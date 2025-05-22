@@ -1,47 +1,75 @@
-const CACHE_NAME = 'my-accounting-time-manager-v1';
+// キャッシュのバージョン名を定義します。
+// アプリを更新するたびにこのバージョン名を変更することで、
+// Service Workerが新しいキャッシュをダウンロードするようにトリガーします。
+const CACHE_NAME = 'my-accounting-app-v1.2'; // ここを v1.1 から v1.2 に変更しました
+
+// キャッシュするファイルの一覧を定義します。
+// ここに記載されたファイルは、初回アクセス時にキャッシュされます。
 const urlsToCache = [
-  './', // アプリケーションのルート (index.htmlなど)
-  './index.html',
-  // 注意: CSSやJavaScriptがindex.htmlに直接埋め込まれている場合、
-  // ここに外部ファイルとして指定する必要はありません。
-  // もし、将来的にCSSやJSを別のファイルとして分ける場合は、
-  // './style.css', './script.js', のように追加してください。
-  './icons/icon-192x192.png', // manifest.jsonで指定したアイコン
-  './icons/icon-512x512.png'  // manifest.jsonで指定したアイコン
+  '/', // トップページ
+  'index.html', // メインのHTMLファイル
+  'manifest.json', // PWAの設定ファイル
+  'service-worker.js', // このService Worker自身もキャッシュ
+  // アイコンファイルは、正しくパスが指定されているか確認してください
+  'icons/icon-192x192.png',
+  'icons/icon-512x512.png',
+  // もし他にCSSファイルやJavaScriptファイルがあればここに追加
+  // 'css/style.css',
+  // 'js/script.js'
 ];
 
-self.addEventListener('install', event => {
+// インストールイベント: Service Workerがインストールされたときに実行されます。
+// ここで、指定したファイルをキャッシュに保存します。
+self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
+      .then((cache) => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-self.addEventListener('fetch', event => {
+// フェッチイベント: アプリがネットワークリクエストを行うたびに実行されます。
+// ここで、キャッシュ優先の戦略を実装します。
+self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
-        // キャッシュにヒットしたら、キャッシュから応答を返す
+      .then((response) => {
+        // キャッシュにレスポンスがあればそれを返す
         if (response) {
           return response;
         }
-        // キャッシュになければ、ネットワークから取得する
-        return fetch(event.request);
+        // なければネットワークから取得し、キャッシュに追加してから返す
+        return fetch(event.request).then(
+          (response) => {
+            // レスポンスが不正な場合（例えば、HTTP 200でない）はキャッシュしない
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            // レスポンスをクローンしてキャッシュに保存
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            return response;
+          }
+        );
       })
   );
 });
 
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME]; // 現在のキャッシュ名
+// アクティベートイベント: 新しいService Workerがアクティブになったときに実行されます。
+// ここで、古いキャッシュを削除します。
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map(cacheName => {
-          // ホワイトリストにない古いキャッシュを削除する
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
+        cacheNames.map((cacheName) => {
+          // 現在のキャッシュ名と異なるキャッシュを削除
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
