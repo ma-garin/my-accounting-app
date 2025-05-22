@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マイ会計・時間管理</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 15px;
+      background-color: #f9f9f9;
+      color: #333;
+      padding-bottom: 70px; /* 下部ボタンのためのスペース */
+      position: relative;
+      line-height: 1.5; /* 行の高さを調整 */
+    }
+    h2, h3 {
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 15px;
+      color: #0056b3; /* タイトル色 */
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 15px;
+      overflow-x: hidden;
+    }
+
+    /* 各セクションの余白調整 */
+    .time-tracker, #setTable, #drinkTable, .summary-table, #addMoreDrink, .quick-add-buttons {
+      margin-bottom: 25px;
+    }
+
+    /* === テーブルの基本スタイル === */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 4px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    th {
+        background-color: #e9ecef;
+        font-weight: bold;
+    }
+
+    /* テーブルごとの列幅調整 */
+    #setTable th:nth-child(1), #setTable td:nth-child(1),
+    #drinkTable th:nth-child(1), #drinkTable td:nth-child(1) { width: 35%; }
+    #setTable th:nth-child(2), #setTable td:nth-child(2),
+    #drinkTable th:nth-child(2), #drinkTable td:nth-child(2) { width: 25%; }
+    #setTable th:nth-child(3), #setTable td:nth-child(3),
+    #drinkTable th:nth-child(3), #drinkTable td:nth-child(3) { width: 20%; }
+    #setTable th:nth-child(4), #setTable td:nth-child(4),
+    #drinkTable th:nth-child(4), #drinkTable td:nth-child(4) { width: 20%; }
+
+    /* 個数ボタンの配置 */
+    .btns {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    .btns button {
+      padding: 3px 7px;
+      font-size: 13px;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .btns button:disabled {
+      background-color: #ccc;
+    }
+    .btns span {
+      flex-shrink: 0;
+    }
+
+    /* 時間管理セクション */
+    .time-tracker {
+      text-align: center;
+    }
+    .time-tracker .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+    .time-tracker button {
+      background-color: #005f7f;
+      color: white;
+      font-size: 13px;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      flex-grow: 1;
+      max-width: calc(50% - 4px);
+      box-sizing: border-box;
+    }
+    .time-table {
+      width: 100%;
+      table-layout: auto;
+      margin-top: 15px; /* ボタンとテーブルの間 */
+    }
+    .time-table th, .time-table td {
+        text-align: left;
+        padding: 4px 8px;
+    }
+    .time-table th { width: 50%; }
+    .time-table td { word-break: break-all; }
+
+    /* 残り時間のアラート */
+    #remaining.alert {
+      color: red;
+      font-weight: bold;
+      animation: blink-animation 1s infinite;
+    }
+    @keyframes blink-animation {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+
+    /* 新しいドリンクの入力欄 */
+    .new-drink-row input[type="text"],
+    .new-drink-row input[type="number"] {
+      width: calc(100% - 10px);
+      box-sizing: border-box;
+      font-size: 13px;
+      padding: 3px 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    #addMoreDrink {
+      padding: 6px 12px;
+      font-size: 14px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      width: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 15px;
+    }
+
+    /* クイック追加ボタン */
+    .quick-add-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .quick-add-buttons button {
+        background-color: #6c757d; /* グレー系 */
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        flex-grow: 1;
+        max-width: calc(33.3% - 10px); /* 3列表示 */
+        box-sizing: border-box;
+    }
+    .quick-add-buttons button:active {
+        background-color: #5a6268;
+    }
+
+    /* 会計金額テーブル */
+    .summary-table {
+      width: 100%;
+      table-layout: auto;
+      margin-top: 20px;
+      border: 1px solid #eee; /* テーブル全体の枠線 */
+      border-radius: 8px;
+      overflow: hidden; /* 角丸のため */
+    }
+    .summary-table th, .summary-table td {
+      text-align: left;
+      padding: 10px 12px; /* パディングを少し多めに */
+    }
+    .summary-table td:last-child {
+      text-align: right;
+      font-weight: bold; /* 合計金額を強調 */
+      color: #d9534f; /* 赤色で強調 */
+      font-size: 1.1em;
+    }
+    .summary-table tr:last-child td {
+        background-color: #f2f2f2; /* 最終行の背景色 */
+        border-top: 2px solid #ccc; /* 最終行の上線 */
+    }
+
+
+    /* スマートフォン向けレスポンシブ対応 */
+    @media screen and (max-width: 390px) {
+      body {
+        padding: 8px;
+        padding-bottom: 60px;
+      }
+      .container {
+        padding: 8px;
+      }
+      h2, h3 {
+        font-size: 1.1em;
+        margin-top: 10px;
+        margin-bottom: 8px;
+      }
+      table {
+        font-size: 10px; /* さらに小さく */
+      }
+      th, td {
+        padding: 3px 2px;
+      }
+      .btns button {
+        font-size: 10px;
+        padding: 2px 4px;
+      }
+      .time-tracker button {
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+      .new-drink-row input[type="text"],
+      .new-drink-row input[type="number"] {
+        font-size: 10px;
+        padding: 2px 3px;
+        width: calc(100% - 6px);
+      }
+      #addMoreDrink {
+        font-size: 11px;
+        padding: 4px 8px;
+        margin-top: 10px;
+      }
+      .quick-add-buttons button {
+        font-size: 12px;
+        padding: 8px 12px;
+        max-width: calc(50% - 8px); /* 2列表示に調整 */
+      }
+      .summary-table th, .summary-table td {
+        padding: 8px 10px;
+      }
+      .summary-table td:last-child {
+        font-size: 1em;
+      }
+      .reset-button {
+        font-size: 13px;
+        padding: 6px 12px;
+      }
+
+      /* 会計金額テーブルの縦積み */
+      .summary-table thead { display: none; }
+      .summary-table tr {
+        display: block;
+        margin-bottom: 6px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 4px;
+      }
+      .summary-table td {
+        display: flex;
+        justify-content: space-between;
+        border: none;
+        padding: 2px 4px;
+      }
+      .summary-table td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-right: 8px;
+        color: #555;
+      }
+    }
+
+    /* 固定フッターボタン */
+    .fixed-buttons-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center; /* 中央寄せ */
+      align-items: center;
+      background-color: #333;
+      padding: 10px 0;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .fixed-buttons-container button {
+      padding: 12px 20px; /* パディングを調整 */
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+      background-color: #dc3545; /* 赤色で強調 */
+    }
+    .fixed-buttons-container button:active {
+        opacity: 0.8;
+    }
+  </style>
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png"> <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="会計タイマー">
+  </head>
+<body>
+<div class="container">
+  <h2>マイ会計・時間管理</h2>
+
+  <h3>現在の状況</h3>
+  <div class="time-tracker">
+    <div class="button-group">
+      <button onclick="startTimer()">開始</button>
+      <button onclick="pauseTimer()">一時停止</button>
+      <button onclick="endTimer()">終了</button>
+      <button onclick="resetTimer()">リセット</button>
+    </div>
+    <table class="time-table">
+      <tr><th>現在の時間</th><td id="now"></td></tr>
+      <tr><th>開始時間</th><td id="start"></td></tr>
+      <tr><th>現セットの残り時間</th><td id="remaining"></td></tr>
+      <tr><th>現在のセット数合計</th><td id="total_sets">0</td></tr>
+      <tr><th>現在の会計合計</th><td id="current_grand_total"><strong>0円</strong></td></tr>
+    </table>
+  </div>
+
+  <h3>セット料金</h3>
+  <table id="setTable">
+    <tr><th>名称</th><th>金額</th><th>個数</th><th>合計金額</th></tr>
+    <tr><td>セットA</td><td>2,500円</td><td><div class="btns"><button onclick="adjust('set1', 1)">+</button><span id="set1_qty">0</span><button onclick="adjust('set1', -1)">-</button></div></td><td id="set1_total">0円</td></tr>
+    <tr><td>セットB</td><td>3,000円</td><td><div class="btns"><button onclick="adjust('set2', 1)">+</button><span id="set2_qty">0</span><button onclick="adjust('set2', -1)">-</button></div></td><td id="set2_total">0円</td></tr>
+  </table>
+
+  <h3>ドリンク</h3>
+  <table id="drinkTable">
+    <tr><th>名称</th><th>金額</th><th>個数</th><th>合計金額</th></tr>
+    <tr><td>Lドリンク</td><td>1,700円</td><td><div class="btns"><button onclick="adjust('ldrink', 1)">+</button><span id="ldrink_qty">0</span><button onclick="adjust('ldrink', -1)">-</button></div></td><td id="ldrink_total">0円</td></tr>
+    <tr><td>メガドリンク</td><td>3,700円</td><td><div class="btns"><button onclick="adjust('megadrink', 1)">+</button><span id="megadrink_qty">0</span><button onclick="adjust('megadrink', -1)">-</button></div></td><td id="megadrink_total">0円</td></tr>
+    <tr><td>ショット</td><td>1,000円</td><td><div class="btns"><button onclick="adjust('shot', 1)">+</button><span id="shot_qty">0</span><button onclick="adjust('shot', -1)">-</button></div></td><td id="shot_total">0円</td></tr>
+    <tbody id="newDrinkRows">
+      </tbody>
+  </table>
+  <button id="addMoreDrink" onclick="addNewDrinkRow()">カスタムドリンクを追加</button>
+
+  <div class="quick-add-buttons">
+    <button onclick="adjust('ldrink', 1)">Lドリンク +1</button>
+    <button onclick="adjust('megadrink', 1)">メガドリンク +1</button>
+    <button onclick="adjust('shot', 1)">ショット +1</button>
+  </div>
+
+  <h3>会計金額</h3>
+  <table class="summary-table">
+    <thead>
+        <tr><th>項目</th><th>金額</th></tr>
+    </thead>
+    <tbody>
+        <tr><td data-label="セット料金合計">セット料金合計</td><td id="set_sum">0円</td></tr>
+        <tr><td data-label="ドリンク合計">ドリンク合計</td><td id="drink_sum">0円</td></tr>
+        <tr><td data-label="小計">小計</td><td id="subtotal_summary">0円</td></tr>
+        <tr><td data-label="サービス料 (10%)">サービス料 (10%)</td><td id="service">0円</td></tr>
+        <tr><td data-label="消費税 (10%)">消費税 (10%)</td><td id="tax">0円</td></tr>
+        <tr><td data-label="合計金額"><strong>合計金額</strong></td><td id="grand_total_summary"><strong>0円</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="fixed-buttons-container">
+  <button class="reset-button" onclick="resetAll()">すべてリセット</button>
+</div>
+
+<script>
+  // ドリンクの価格と現在の数量
+  const prices = { ldrink: 1700, megadrink: 3700, shot: 1000, set1: 2500, set2: 3000 };
+  const quantities = { ldrink: 0, megadrink: 0, shot: 0, set1: 0, set2: 0 };
+  const maxNewDrinks = 5; // 追加できるカスタムドリンクの最大数
+  let newDrinkCount = 0; // 現在追加されているカスタムドリンクの数
+  let newDrinkIds = []; // カスタムドリンクのIDを管理する配列
+
+  const SET_DURATION_MINUTES = 40; // 1セットの分数
+  const SET_DURATION_MS = SET_DURATION_MINUTES * 60 * 1000; // 1セットのミリ秒
+
+  let timerStart = null; // 現在のセットの開始時刻（最初のセット開始時刻ではない）
+  let actualSessionStartTime = null; // 最初に「開始」ボタンを押した実際のセッション開始時刻
+  let interval = null; // updateNow関数を呼び出すインターバルID
+  let setCount = 0; // 現在のセット数
+
+  // 数値を3桁区切りでフォーマット
+  function formatNumber(num) {
+    return num.toLocaleString();
+  }
+
+  // ドリンクやセットの数量を調整
+  function adjust(item, delta) {
+    // セットAとセットBは、自動更新されるセット数とは別に手動調整可能
+    if (item === 'set1' || item === 'set2') {
+        quantities[item] = Math.max(0, quantities[item] + delta);
+    } else {
+        // ドリンクの場合は通常の調整
+        quantities[item] = Math.max(0, quantities[item] + delta);
+    }
+
+    const qtyElement = document.getElementById(item + '_qty');
+    const totalElement = document.getElementById(item + '_total');
+    if (qtyElement) qtyElement.innerText = quantities[item];
+    if (totalElement) totalElement.innerText = `${formatNumber(prices[item] * quantities[item])}円`;
+    calculate(); // 計算を更新
+  }
+
+  // 全ての合計金額を計算し表示を更新
+  function calculate() {
+    // セット料金の計算 (新しいロジック)
+    let calculatedSetTotal = 0;
+    if (setCount >= 1) {
+        calculatedSetTotal = prices.set1 + (setCount - 1) * prices.set2; // 2500円 + (セット数-1) * 3000円
+    }
+    // 手動で調整されたセットA/Bは計算に含まない（ロジックの意図に従うため）
+    // もし手動セットA/Bも料金に含める場合は、ここでmanualSetTotalを加算してください。
+    // let manualSetTotal = prices.set1 * quantities.set1 + prices.set2 * quantities.set2;
+    // let setTotal = calculatedSetTotal + manualSetTotal; // 組み合わせると重複計算になる可能性あり
+
+    let setTotal = calculatedSetTotal; // ご指示の計算ロジックに合わせる
+
+    let drinkTotal = 0;
+    // 標準ドリンクの合計
+    drinkTotal += prices.ldrink * quantities.ldrink;
+    drinkTotal += prices.megadrink * quantities.megadrink;
+    drinkTotal += prices.shot * quantities.shot;
+
+    // 追加ドリンクの合計
+    newDrinkIds.forEach(id => {
+      drinkTotal += (prices[id] || 0) * (quantities[id] || 0);
+      const totalElementId = document.getElementById(id + '_total');
+      const qtyElementId = document.getElementById(id + '_qty');
+      if (totalElementId && qtyElementId) {
+        totalElementId.innerText = `${formatNumber(prices[id] * quantities[id])}円`;
+        qtyElementId.innerText = quantities[id];
+      }
+    });
+
+    const subtotal = setTotal + drinkTotal; // 小計 (セット料金 + ドリンク合計)
+
+    const service = Math.floor(subtotal * 0.10); // サービス料を計算
+
+    const subtotalWithService = subtotal + service; // サービス料を含んだ金額
+
+    const tax = Math.floor(subtotalWithService * 0.10); // サービス料を含んだ金額に対して消費税を計算
+
+    const finalTotal = subtotalWithService + tax; // 最終的な合計金額
+
+    // メイン画面の表示更新
+    document.getElementById('set1_total').innerText = `${formatNumber(prices.set1 * quantities.set1)}円`; // 手動セットA
+    document.getElementById('set2_total').innerText = `${formatNumber(prices.set2 * quantities.set2)}円`; // 手動セットB
+    document.getElementById('ldrink_total').innerText = `${formatNumber(prices.ldrink * quantities.ldrink)}円`;
+    document.getElementById('megadrink_total').innerText = `${formatNumber(prices.megadrink * quantities.megadrink)}円`;
+    document.getElementById('shot_total').innerText = `${formatNumber(prices.shot * quantities.shot)}円`;
+
+    // 「現在の状況」セクションの会計金額合計を更新
+    document.getElementById('current_grand_total').innerHTML = `<strong>${formatNumber(finalTotal)}円</strong>`;
+
+    // 会計金額サマリーテーブルの表示更新
+    document.getElementById('set_sum').innerText = `${formatNumber(setTotal)}円`;
+    document.getElementById('drink_sum').innerText = `${formatNumber(drinkTotal)}円`;
+    document.getElementById('subtotal_summary').innerText = `${formatNumber(subtotal)}円`; // 小計の表示を追加
+    document.getElementById('service').innerText = `${formatNumber(service)}円`;
+    document.getElementById('tax').innerText = `${formatNumber(tax)}円`;
+    document.getElementById('grand_total_summary').innerHTML = `<strong>${formatNumber(finalTotal)}円</strong>`;
+  }
+
+  // 新しいカスタムドリンク行を追加
+  function addNewDrinkRow() {
+    if (newDrinkCount < maxNewDrinks) {
+      newDrinkCount++;
+      const newId = `newdrink${newDrinkCount}`;
+      newDrinkIds.push(newId);
+      // 新しいドリンクの価格と数量を初期化
+      prices[newId] = 0;
+      quantities[newId] = 0;
+
+      const newRow = document.createElement('tr');
+      newRow.className = 'new-drink-row';
+      newRow.innerHTML = `
+        <td><input type="text" id="${newId}_name" placeholder="ドリンク名"></td>
+        <td><input type="number" id="${newId}_price" placeholder="金額" min="0" oninput="updateNewDrinkPrice('${newId}')">円</td>
+        <td><div class="btns"><button onclick="adjustNewDrink('${newId}', 1)">+</button><span id="${newId}_qty">0</span><button onclick="adjustNewDrink('${newId}', -1)">-</button></div></td>
+        <td id="${newId}_total">0円</td>
+      `;
+      document.getElementById('newDrinkRows').appendChild(newRow);
+    } else {
+      alert(`追加できるカスタムドリンクは${maxNewDrinks}個までです。`);
+    }
+  }
+
+  // カスタムドリンクの金額入力時の処理
+  function updateNewDrinkPrice(id) {
+      const priceInput = document.getElementById(`${id}_price`);
+      const price = parseInt(priceInput.value);
+      if (!isNaN(price) && price >= 0) {
+          prices[id] = price;
+      } else {
+          prices[id] = 0; // 不正な入力の場合は0に設定
+      }
+      calculate(); // 価格が変更されたら合計を再計算
+  }
+
+  // カスタムドリンクの数量調整
+  function adjustNewDrink(id, delta) {
+    const nameInput = document.getElementById(`${id}_name`);
+    const priceInput = document.getElementById(`${id}_price`);
+    const name = nameInput.value.trim();
+    const price = parseInt(priceInput.value);
+
+    // 名前の入力は必須ではないが、価格が正しく入力されているかを確認
+    if (!isNaN(price) && price >= 0) {
+      // 価格が未設定または変更された場合、prices[id]を更新
+      if (!prices[id] || prices[id] !== price) {
+        prices[id] = price;
+      }
+      // 数量が未設定の場合初期化
+      if (typeof quantities[id] === 'undefined') {
+        quantities[id] = 0;
+      }
+      quantities[id] = Math.max(0, quantities[id] + delta);
+      const qtyElement = document.getElementById(`${id}_qty`);
+      const totalElement = document.getElementById(`${id}_total`);
+      if (qtyElement) qtyElement.innerText = quantities[id];
+      if (totalElement) totalElement.innerText = `${formatNumber(prices[id] * quantities[id])}円`;
+      calculate();
+    } else if (delta > 0 && isNaN(price)) { // プラスしようとして価格が未入力/不正な場合
+      alert('カスタムドリンクの金額を半角数字で入力してください。');
+      priceInput.focus(); // 入力欄にフォーカス
+    } else if (delta > 0 && price < 0) { // 価格がマイナスの場合
+        alert('金額は0以上の値を入力してください。');
+        priceInput.focus();
+    } else { // 数量を減らす場合は、価格が入力されていなくても減らせるようにする
+        if (typeof quantities[id] === 'undefined') {
+            quantities[id] = 0;
+        }
+        quantities[id] = Math.max(0, quantities[id] + delta);
+        const qtyElement = document.getElementById(`${id}_qty`);
+        const totalElement = document.getElementById(`${id}_total`);
+        if (qtyElement) totalElement.innerText = `${formatNumber((prices[id] || 0) * quantities[id])}円`;
+        calculate();
+    }
+  }
+
+  // 現在時刻とタイマーの状態を更新
+  function updateNow() {
+    const now = new Date();
+    document.getElementById('now').innerText = now.toLocaleTimeString();
+
+    if (actualSessionStartTime) {
+      // 現在のセットの開始時刻を算出（例: 最初の開始時間 + (セット数-1) * 40分）
+      let currentSetStartTime = new Date(actualSessionStartTime.getTime() + (setCount - 1) * SET_DURATION_MS);
+
+      // 現在のセットの終了時刻
+      let currentSetEndTime = new Date(currentSetStartTime.getTime() + SET_DURATION_MS);
+
+      // 現在時刻が現在のセットの終了時刻を過ぎているかチェック
+      if (now.getTime() >= currentSetEndTime.getTime()) {
+        // 次のセットへ自動更新
+        setCount++;
+        updateSetCount();
+        calculate(); // セット数が増えたので料金を再計算
+        // 次のセットの残り時間は、新しいセットの開始からカウントダウン
+        currentSetStartTime = new Date(actualSessionStartTime.getTime() + (setCount - 1) * SET_DURATION_MS);
+        currentSetEndTime = new Date(currentSetStartTime.getTime() + SET_DURATION_MS);
+      }
+
+      // 現在のセットの残り時間を計算
+      const remainingMs = currentSetEndTime - now;
+      const remainingElement = document.getElementById('remaining');
+
+      if (remainingMs > 0) {
+        const remainingMins = Math.floor(remainingMs / 60000);
+        const remainingSecs = Math.floor((remainingMs % 60000) / 1000);
+        remainingElement.innerText = `${String(remainingMins).padStart(2, '0')}:${String(remainingSecs).padStart(2, '0')}`;
+
+        // 残り時間が5分を切ったらアラートクラスを追加
+        if (remainingMins < 5) {
+          remainingElement.classList.add('alert');
+        } else {
+          remainingElement.classList.remove('alert');
+        }
+      } else {
+        remainingElement.innerText = "次のセットへ移行中..."; // 一瞬表示
+        remainingElement.classList.remove('alert'); // アラート解除
+      }
+    }
+  }
+
+  // タイマーを開始
+  function startTimer() {
+    if (!interval) { // タイマーがまだ動いていない場合のみ開始
+      if (!actualSessionStartTime) { // 初めてタイマーを開始する場合
+        actualSessionStartTime = new Date(); // 実際のセッション開始時刻を記録
+        document.getElementById('start').innerText = actualSessionStartTime.toLocaleTimeString();
+        setCount = 1; // 最初のセットとしてカウント
+        updateSetCount();
+      }
+      interval = setInterval(updateNow, 1000); // 1秒ごとに更新
+      updateNow(); // 即座に一度更新
+      calculate(); // タイマー開始時に料金を再計算
+    }
+  }
+
+  // タイマーを一時停止
+  function pauseTimer() {
+    clearInterval(interval);
+    interval = null;
+  }
+
+  // タイマーを終了
+  function endTimer() {
+    pauseTimer(); // タイマーを停止
+
+    // 全ての表示をリセット
+    document.getElementById('start').innerText = '';
+    document.getElementById('remaining').innerText = '';
+    setCount = 0; // セット数をリセット
+    actualSessionStartTime = null; // セッション開始時間をリセット
+    updateSetCount(); // 表示を更新
+    calculate(); // 料金計算も更新
+  }
+
+  // タイマーのみをリセット（料金はそのまま）
+  function resetTimer() {
+    pauseTimer();
+    document.getElementById('start').innerText = '';
+    document.getElementById('remaining').innerText = '';
+    setCount = 0;
+    actualSessionStartTime = null; // 開始時間をリセット
+    updateSetCount();
+    calculate(); // タイマーリセット時も料金は再計算
+  }
+
+  // セット数の表示を更新
+  function updateSetCount() {
+    document.getElementById('total_sets').innerText = setCount;
+  }
+
+  // すべてリセット（下部固定ボタン）
+  function resetAll() {
+    // 時間管理のリセット
+    endTimer(); // endTimerが時間関連の多くをリセットするので呼び出す
+
+    // セット料金のリセット（手動分は元々扱っていないが、念のため初期化）
+    quantities.set1 = 0;
+    quantities.set2 = 0;
+    document.getElementById('set1_qty').innerText = 0;
+    document.getElementById('set1_total').innerText = '0円';
+    document.getElementById('set2_qty').innerText = 0;
+    document.getElementById('set2_total').innerText = '0円';
+
+    // ドリンクのリセット
+    quantities.ldrink = 0;
+    quantities.megadrink = 0;
+    quantities.shot = 0;
+    document.getElementById('ldrink_qty').innerText = 0;
+    document.getElementById('ldrink_total').innerText = '0円';
+    document.getElementById('megadrink_qty').innerText = 0;
+    document.getElementById('megadrink_total').innerText = '0円';
+    document.getElementById('shot_qty').innerText = 0;
+    document.getElementById('shot_total').innerText = '0円';
+
+    // 追加ドリンクのリセット
+    newDrinkIds.forEach(id => {
+      delete prices[id]; // pricesオブジェクトからも削除
+      delete quantities[id]; // quantitiesオブジェクトからも削除
+      const rowToRemove = document.querySelector(`#newDrinkRows tr:has(input[id='${id}_name'])`);
+      if (rowToRemove) {
+        rowToRemove.remove();
+      }
+    });
+    newDrinkIds = [];
+    newDrinkCount = 0;
+    document.getElementById('newDrinkRows').innerHTML = ''; // 追加されたドリンクの表示をクリア
+
+    // 会計金額のリセットを最終的に呼び出す
+    calculate();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // ページ読み込み時の初期表示
+    updateNow(); // 現在時刻の表示
+    calculate(); // 合計金額の計算と表示更新
+  });
+
+  // Service Workerの登録（PWA化の最終ステップ）
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        })
+        .catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+  }
+</script>
+</body>
+</html>
