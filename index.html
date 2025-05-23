@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>マイ会計・時間管理</title>
   <style>
     body {
@@ -137,12 +137,12 @@
       100% { opacity: 1; }
     }
 
-    /* 新しいドリンクの入力欄 */
+    /* 新しいドリンクの入力欄 - フォントサイズを16px以上に修正 */
     .new-drink-row input[type="text"],
     .new-drink-row input[type="number"] {
       width: calc(100% - 10px);
       box-sizing: border-box;
-      font-size: 13px;
+      font-size: 16px; /* iPhoneのズーム抑制のため16px以上 */
       padding: 3px 5px;
       border: 1px solid #ddd;
       border-radius: 4px;
@@ -240,9 +240,10 @@
         font-size: 11px;
         padding: 6px 10px;
       }
+      /* レスポンシブ時の入力欄フォントサイズも16px以上に保つ */
       .new-drink-row input[type="text"],
       .new-drink-row input[type="number"] {
-        font-size: 10px;
+        font-size: 16px; /* iPhoneのズーム抑制のため16px以上 */
         padding: 2px 3px;
         width: calc(100% - 6px);
       }
@@ -338,7 +339,7 @@
     <table class="time-table">
       <tr><th>現在の時間</th><td id="now"></td></tr>
       <tr><th>開始時間</th><td id="start"></td></tr>
-      <tr><th>現セットの残り時間</th><td id="remaining"></td></tr>
+      <tr><th>経過時間</th><td id="elapsed_time"></td></tr> <tr><th>現セットの残り時間</th><td id="remaining"></td></tr>
       <tr><th>現在のセット数合計</th><td id="total_sets">0</td></tr>
       <tr><th>現在の会計合計</th><td id="current_grand_total"><strong>0円</strong></td></tr>
     </table>
@@ -389,6 +390,14 @@
 </div>
 
 <script>
+  // iPhone向け：ダブルタップズームを抑制するJavaScriptコード
+  // 注意: 全てのダブルタップイベントを阻止するため、他のダブルタップ機能も無効になります
+  document.addEventListener('touchend', function(event) {
+      if (event.detail > 1) { // event.detail はクリック（タップ）回数
+          event.preventDefault();
+      }
+  }, { passive: false }); // passive: false を指定してpreventDefaultが機能するようにする
+
   // ドリンクの価格と現在の数量
   const prices = { ldrink: 1700, megadrink: 3700, shot: 1000, set1: 2500, set2: 3000 };
   const quantities = { ldrink: 0, megadrink: 0, shot: 0, set1: 0, set2: 0 };
@@ -569,6 +578,18 @@
     document.getElementById('now').innerText = now.toLocaleTimeString();
 
     if (actualSessionStartTime) {
+      // 経過時間を計算
+      const elapsedMs = now.getTime() - actualSessionStartTime.getTime();
+      const elapsedHours = Math.floor(elapsedMs / (1000 * 60 * 60));
+      const elapsedMins = Math.floor((elapsedMs % (1000 * 60 * 60)) / (1000 * 60));
+      const elapsedSecs = Math.floor((elapsedMs % (1000 * 60)) / 1000);
+
+      // 経過時間をフォーマットして表示
+      const formattedElapsedTime =
+        `${String(elapsedHours).padStart(2, '0')}:${String(elapsedMins).padStart(2, '0')}:${String(elapsedSecs).padStart(2, '0')}`;
+      document.getElementById('elapsed_time').innerText = formattedElapsedTime;
+
+
       // 現在のセットの開始時刻を算出（例: 最初の開始時間 + (セット数-1) * 40分）
       let currentSetStartTime = new Date(actualSessionStartTime.getTime() + (setCount - 1) * SET_DURATION_MS);
 
@@ -605,6 +626,9 @@
         remainingElement.innerText = "次のセットへ移行中..."; // 一瞬表示
         remainingElement.classList.remove('alert'); // アラート解除
       }
+    } else {
+      // タイマーが開始されていない場合は経過時間をクリア
+      document.getElementById('elapsed_time').innerText = '';
     }
   }
 
@@ -636,6 +660,7 @@
     // 全ての表示をリセット
     document.getElementById('start').innerText = '';
     document.getElementById('remaining').innerText = '';
+    document.getElementById('elapsed_time').innerText = ''; // 明示的にクリア
     setCount = 0; // セット数をリセット
     actualSessionStartTime = null; // セッション開始時間をリセット
     updateSetCount(); // 表示を更新
@@ -647,6 +672,7 @@
     pauseTimer();
     document.getElementById('start').innerText = '';
     document.getElementById('remaining').innerText = '';
+    document.getElementById('elapsed_time').innerText = ''; // 明示的にクリア
     setCount = 0;
     actualSessionStartTime = null; // 開始時間をリセット
     updateSetCount();
