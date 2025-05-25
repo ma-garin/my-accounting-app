@@ -1,18 +1,19 @@
 // キャッシュのバージョン名を定義します。
 // アプリを更新するたびにこのバージョン名を変更することで、
 // Service Workerが新しいキャッシュをダウンロードするようにトリガーします。
-const CACHE_NAME = 'my-accounting-app-v1.2'; // ここを v1.1 から v1.2 に変更しました
+const CACHE_NAME = 'my-accounting-app-v1.9'; // 新しいバージョンに変更しました
 
 // キャッシュするファイルの一覧を定義します。
 // ここに記載されたファイルは、初回アクセス時にキャッシュされます。
 const urlsToCache = [
   '/', // トップページ
-  'index.html', // メインのHTMLファイル
+  'index.html', // メインのHTMLファイル (会計画面)
+  'simulation.html', // 新しく追加したシミュレーション画面
   'manifest.json', // PWAの設定ファイル
   'service-worker.js', // このService Worker自身もキャッシュ
   // アイコンファイルは、正しくパスが指定されているか確認してください
   'icons/icon-192x192.png',
-  'icons/icon-512x512.png',
+  'icons/icon-512x512.png'
   // もし他にCSSファイルやJavaScriptファイルがあればここに追加
   // 'css/style.css',
   // 'js/script.js'
@@ -43,7 +44,7 @@ self.addEventListener('fetch', (event) => {
         // なければネットワークから取得し、キャッシュに追加してから返す
         return fetch(event.request).then(
           (response) => {
-            // レスポンスが不正な場合（例えば、HTTP 200でない）はキャッシュしない
+            // レスポンスが不正な場合（例えば、HTTP 200でない、またはBasicタイプでない）はキャッシュしない
             if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
@@ -68,7 +69,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           // 現在のキャッシュ名と異なるキャッシュを削除
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== CACHE_NAME && cacheName.startsWith('my-accounting-app-')) {
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
