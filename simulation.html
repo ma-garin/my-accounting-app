@@ -18,7 +18,7 @@
       padding: 15px;
       background-color: #f9f9f9;
       color: #333;
-      padding-bottom: 70px; /* 下部固定ボタンのためのスペース */
+      padding-bottom: 70px; /* 下部ボタンのためのスペース */
       position: relative;
       line-height: 1.5; /* 行の高さを調整 */
     }
@@ -528,6 +528,39 @@
           });
       }
 
+      /**
+       * カスタムメッセージボックスを表示する
+       * @param {string} message - 表示するメッセージ
+       */
+      function showMessage(message) {
+        const messageBox = document.createElement('div');
+        messageBox.style.cssText = `
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background-color: #fff;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+          z-index: 9999;
+          text-align: center;
+          font-size: 1.1rem;
+          color: #333;
+          max-width: 80%;
+          border: 1px solid #ccc;
+        `;
+        messageBox.innerHTML = `
+          <p>${message}</p>
+          <button id="messageBoxCloseButton" style="margin-top: 15px; background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">OK</button>
+        `;
+        document.body.appendChild(messageBox);
+
+        document.getElementById('messageBoxCloseButton').addEventListener('click', () => {
+          document.body.removeChild(messageBox);
+        });
+      }
+
       // === 主なロジック関数 ===
 
       /**
@@ -536,6 +569,7 @@
        * @param {number} delta - 変更量 (+1 または -1)
        */
       function adjustQuantity(item, delta) {
+        console.log(`adjustQuantity called for item: ${item}, delta: ${delta}`);
         quantities[item] = Math.max(0, quantities[item] + delta);
         updateItemDisplay(item);
         calculateSimulationTotal();
@@ -547,6 +581,7 @@
        * @param {number} delta - 変更量 (+1 または -1)
        */
       function adjustChampagneQuantity(item, delta) {
+          console.log(`adjustChampagneQuantity called for item: ${item}, delta: ${delta}`);
           champagneQuantities[item] = Math.max(0, champagneQuantities[item] + delta);
           updateChampagneDisplay(item);
           calculateSimulationTotal();
@@ -559,8 +594,18 @@
       function updateItemDisplay(item) {
         const qtyElement = document.getElementById(`${item}_qty`);
         const totalElement = document.getElementById(`${item}_total`);
-        if (qtyElement) qtyElement.innerText = quantities[item];
-        if (totalElement) totalElement.innerText = `${formatNumber(prices[item] * quantities[item])}円`;
+        if (qtyElement) {
+          qtyElement.innerText = quantities[item];
+          console.log(`Updated ${item}_qty to: ${quantities[item]}`);
+        } else {
+          console.log(`Element ${item}_qty not found.`);
+        }
+        if (totalElement) {
+          totalElement.innerText = `${formatNumber(prices[item] * quantities[item])}円`;
+          console.log(`Updated ${item}_total to: ${prices[item] * quantities[item]}`);
+        } else {
+          console.log(`Element ${item}_total not found.`);
+        }
       }
 
       /**
@@ -572,14 +617,25 @@
           const totalElement = document.getElementById(`champagne-total-${champagneId}`);
           const champagnePrice = champagnes.find(ch => ch.id === champagneId)?.price || 0;
 
-          if (qtyElement) qtyElement.innerText = champagneQuantities[champagneId];
-          if (totalElement) totalElement.textContent = `${formatNumber(champagnePrice * champagneQuantities[champagneId])}円`;
+          if (qtyElement) {
+            qtyElement.innerText = champagneQuantities[champagneId];
+            console.log(`Updated champagne-qty-${champagneId} to: ${champagneQuantities[champagneId]}`);
+          } else {
+            console.log(`Element champagne-qty-${champagneId} not found.`);
+          }
+          if (totalElement) {
+            totalElement.textContent = `${formatNumber(champagnePrice * champagneQuantities[champagneId])}円`;
+            console.log(`Updated champagne-total-${champagneId} to: ${champagnePrice * champagneQuantities[champagneId]}`);
+          } else {
+            console.log(`Element champagne-total-${champagneId} not found.`);
+          }
       }
 
       /**
        * シミュレーションの合計金額を計算し表示を更新する
        */
       function calculateSimulationTotal() {
+        console.log('calculateSimulationTotal called.');
         // 滞在時間（分）に基づいてセット料金を計算
         let simulatedSetTotal = 0;
         if (simulatedTotalMinutes > 0) {
@@ -655,18 +711,22 @@
 
           // イベントリスナーを動的に追加
           const newPriceInput = document.getElementById(`${newId}_price`);
-          newPriceInput.addEventListener('input', () => updateNewSimDrinkPrice(newId));
+          newPriceInput.addEventListener('input', (event) => {
+            console.log(`Custom drink price input changed for ${newId}`);
+            updateNewSimDrinkPrice(newId);
+          });
 
           const buttons = newRow.querySelectorAll('.btns button');
           buttons.forEach(button => {
             button.addEventListener('click', (event) => {
+              console.log(`Custom drink button clicked: ${event.target.dataset.item}, delta: ${event.target.dataset.delta}`);
               const item = event.target.dataset.item;
               const delta = parseInt(event.target.dataset.delta);
               adjustSimNewDrink(item, delta);
             });
           });
         } else {
-          alert(`追加できるカスタムドリンクは${MAX_NEW_DRINKS}個までです。`);
+          showMessage(`追加できるカスタムドリンクは${MAX_NEW_DRINKS}個までです。`); // alert()をshowMessage()に置き換え
         }
       }
 
@@ -692,12 +752,13 @@
        * @param {number} delta - 変更量 (+1 または -1)
        */
       function adjustSimNewDrink(id, delta) {
+        console.log(`adjustSimNewDrink called for item: ${id}, delta: ${delta}`);
         const priceInput = document.getElementById(`${id}_price`);
         const price = parseInt(priceInput.value);
 
         if (isNaN(price) || price < 0) {
           if (delta > 0) { // プラスしようとしたときに価格が不正
-            alert('カスタムドリンクの金額を半角数字で入力してください。');
+            showMessage('カスタムドリンクの金額を半角数字で入力してください。'); // alert()をshowMessage()に置き換え
             priceInput.focus();
             return;
           }
@@ -717,6 +778,7 @@
        * シャンパンリストをHTMLテーブルに動的に生成する
        */
       function renderChampagneTable() {
+          console.log('renderChampagneTable called.');
           champagneTableBody.innerHTML = ''; // 既存の行をクリア
 
           champagnes.forEach(champagne => {
@@ -725,7 +787,7 @@
               row.insertCell().textContent = `${formatNumber(champagne.price)}円`; // 価格もフォーマット
               const quantityCell = row.insertCell();
               quantityCell.classList.add('btns'); // スタイルを合わせる
-              // ここを修正: マイナスボタンを左、プラスボタンを右にする
+              // ここを修正: プラスボタンを左、マイナスボタンを右にする
               quantityCell.innerHTML = `
                   <button data-item="${champagne.id}" data-type="champagne" data-delta="1">+</button>
                   <span id="champagne-qty-${champagne.id}">${champagneQuantities[champagne.id]}</span>
@@ -743,6 +805,7 @@
        * シミュレーション全てをリセットする
        */
       function resetSimulation() {
+        console.log('resetSimulation called.');
         // 滞在時間をリセット
         simulatedTotalMinutes = 0;
 
@@ -792,7 +855,6 @@
        * イベントリスナーの登録
        */
       function registerEventListeners() {
-        // iPhone向け：ダブルタップズームを抑制
         document.addEventListener('touchend', function(event) {
             if (event.detail > 1) {
                 event.preventDefault();
@@ -801,14 +863,17 @@
 
         // 滞在時間操作ボタン
         add40MinButton.addEventListener('click', () => {
+            console.log('+40min button clicked.');
             simulatedTotalMinutes += SET_DURATION_MINUTES;
             calculateSimulationTotal();
         });
         subtract40MinButton.addEventListener('click', () => {
+            console.log('-40min button clicked.');
             simulatedTotalMinutes = Math.max(0, simulatedTotalMinutes - SET_DURATION_MINUTES);
             calculateSimulationTotal();
         });
         resetTimeButton.addEventListener('click', () => {
+            console.log('Reset time button clicked.');
             simulatedTotalMinutes = 0;
             calculateSimulationTotal();
         });
@@ -818,6 +883,7 @@
         document.querySelector('#simulationDrinkTable').addEventListener('click', (event) => {
           const button = event.target.closest('button[data-item]');
           if (button && !button.dataset.type) { // typeが指定されていない（通常ドリンク）
+            console.log('Delegated drink button click detected.');
             const item = button.dataset.item;
             const delta = parseInt(button.dataset.delta);
             adjustQuantity(item, delta);
@@ -828,6 +894,7 @@
         document.querySelector('#simulationChampagneTable').addEventListener('click', (event) => {
             const button = event.target.closest('button[data-item][data-type="champagne"]');
             if (button) {
+                console.log('Delegated champagne button click detected.');
                 const item = button.dataset.item;
                 const delta = parseInt(button.dataset.delta);
                 adjustChampagneQuantity(item, delta);
@@ -836,10 +903,16 @@
 
 
         // カスタムドリンク追加ボタン
-        document.getElementById('addNewSimDrinkRowButton').addEventListener('click', addNewSimDrinkRow);
+        document.getElementById('addNewSimDrinkRowButton').addEventListener('click', () => {
+          console.log('Add new custom drink row button clicked.');
+          addNewSimDrinkRow();
+        });
 
         // シミュレーションリセットボタン
-        document.getElementById('resetSimulationButton').addEventListener('click', resetSimulation);
+        document.getElementById('resetSimulationButton').addEventListener('click', () => {
+          console.log('Reset simulation button clicked.');
+          resetSimulation();
+        });
 
         // Service Workerの登録 (index.htmlと共通)
         if ('serviceWorker' in navigator) {
@@ -877,6 +950,7 @@
         initializePriceDisplays(); // ドリンクの価格表示を初期化時にフォーマット
         renderChampagneTable(); // シャンパンテーブルを生成
         calculateSimulationTotal(); // 合計金額の計算と表示更新 (滞在時間も初期表示される)
+        registerEventListeners(); // イベントリスナーを登録
       });
 
     })(); // 即時関数の終わり
