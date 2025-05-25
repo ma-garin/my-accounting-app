@@ -221,6 +221,7 @@
 
     .fixed-bottom-bar button {
       flex-grow: 1; /* 均等に幅を広げる */
+      flex-basis: calc(33.33% - 8px); /* 3列表示のための幅 */
       padding: 10px 15px; /* パディングを調整 */
       font-size: 0.95rem; /* フォントサイズを調整 */
     }
@@ -302,7 +303,7 @@
           <tbody>
             <tr>
               <td>Lドリンク</td>
-              <td>1700円</td>
+              <td class="price-cell" data-price="1700"></td>
               <td>
                 <div class="btns">
                   <button data-item="ldrink" data-delta="1">+</button>
@@ -314,7 +315,7 @@
             </tr>
             <tr>
               <td>メガドリンク</td>
-              <td>3700円</td>
+              <td class="price-cell" data-price="3700"></td>
               <td>
                 <div class="btns">
                   <button data-item="megadrink" data-delta="1">+</button>
@@ -326,7 +327,7 @@
             </tr>
             <tr>
               <td>SHOT</td>
-              <td>1500円</td>
+              <td class="price-cell" data-price="1500"></td>
               <td>
                 <div class="btns">
                   <button data-item="shot" data-delta="1">+</button>
@@ -338,7 +339,7 @@
             </tr>
             <tr>
               <td>ゲストSHOT</td>
-              <td>1000円</td>
+              <td class="price-cell" data-price="1000"></td>
               <td>
                 <div class="btns">
                   <button data-item="guestshot" data-delta="1">+</button>
@@ -350,7 +351,7 @@
             </tr>
             <tr>
               <td>カラオケ5曲</td>
-              <td>1000円</td>
+              <td class="price-cell" data-price="1000"></td>
               <td>
                 <div class="btns">
                   <button data-item="karaoke" data-delta="1">+</button>
@@ -514,6 +515,20 @@
           const minutes = totalMinutes % 60;
           return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
       }
+
+      /**
+       * テーブル内の価格セルにフォーマットされた価格を設定する
+       */
+      function initializePriceDisplays() {
+          document.querySelectorAll('#simulationDrinkTable .price-cell').forEach(cell => {
+              const price = parseInt(cell.dataset.price);
+              if (!isNaN(price)) {
+                  cell.textContent = `${formatNumber(price)}円`;
+              }
+          });
+      }
+
+      // === 主なロジック関数 ===
 
       /**
        * 特定のアイテム（通常ドリンク、カスタムドリンク）の数量を調整し、表示を更新する
@@ -707,13 +722,14 @@
           champagnes.forEach(champagne => {
               const row = champagneTableBody.insertRow();
               row.insertCell().textContent = champagne.name;
-              row.insertCell().textContent = `${formatNumber(champagne.price)}円`;
+              row.insertCell().textContent = `${formatNumber(champagne.price)}円`; // 価格もフォーマット
               const quantityCell = row.insertCell();
               quantityCell.classList.add('btns'); // スタイルを合わせる
+              // ここを修正: マイナスボタンを左、プラスボタンを右にする
               quantityCell.innerHTML = `
-                  <button data-item="${champagne.id}" data-type="champagne" data-delta="-1">-</button>
-                  <span id="champagne-qty-${champagne.id}">${champagneQuantities[champagne.id]}</span>
                   <button data-item="${champagne.id}" data-type="champagne" data-delta="1">+</button>
+                  <span id="champagne-qty-${champagne.id}">${champagneQuantities[champagne.id]}</span>
+                  <button data-item="${champagne.id}" data-type="champagne" data-delta="-1">-</button>
               `;
               const totalCell = row.insertCell();
               totalCell.id = `champagne-total-${champagne.id}`;
@@ -858,7 +874,7 @@
 
       // === 初期化処理 ===
       document.addEventListener('DOMContentLoaded', () => {
-        registerEventListeners(); // イベントリスナーを登録
+        initializePriceDisplays(); // ドリンクの価格表示を初期化時にフォーマット
         renderChampagneTable(); // シャンパンテーブルを生成
         calculateSimulationTotal(); // 合計金額の計算と表示更新 (滞在時間も初期表示される)
       });

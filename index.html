@@ -129,14 +129,19 @@
 
     .time-buttons {
       display: flex;
-      justify-content: space-around;
+      flex-wrap: wrap; /* ボタンが多ければ折り返す */
+      justify-content: center; /* 中央寄せ */
+      gap: 10px; /* ボタン間のスペース */
       margin-top: 20px;
     }
 
     .time-buttons button {
-      flex-grow: 1;
-      margin: 0 5px;
+      flex: 1 1 45%; /* 2列表示にするための幅 */
+      max-width: 150px; /* ボタンの最大幅を制限 */
+      padding: 10px 10px; /* ボタンのパディング */
+      font-size: 0.95rem; /* フォントサイズ */
     }
+
 
     /* === 会計サマリーテーブル === */
     .summary-table td:nth-child(1) {
@@ -211,6 +216,7 @@
 
     .fixed-bottom-bar button {
       flex-grow: 1; /* 均等に幅を広げる */
+      flex-basis: calc(33.33% - 8px); /* 3列表示のための幅 */
       padding: 10px 15px; /* パディングを調整 */
       font-size: 0.95rem; /* フォントサイズを調整 */
     }
@@ -329,8 +335,7 @@
           <tbody>
             <tr>
               <td>Lドリンク</td>
-              <td>1700円</td>
-              <td>
+              <td class="price-cell" data-price="1700"></td> <td>
                 <div class="btns">
                   <button data-item="ldrink" data-delta="1">+</button>
                   <span id="ldrink_qty">0</span>
@@ -341,7 +346,7 @@
             </tr>
             <tr>
               <td>メガドリンク</td>
-              <td>3700円</td>
+              <td class="price-cell" data-price="3700"></td>
               <td>
                 <div class="btns">
                   <button data-item="megadrink" data-delta="1">+</button>
@@ -353,7 +358,7 @@
             </tr>
             <tr>
               <td>SHOT</td>
-              <td>1500円</td>
+              <td class="price-cell" data-price="1500"></td>
               <td>
                 <div class="btns">
                   <button data-item="shot" data-delta="1">+</button>
@@ -365,7 +370,7 @@
             </tr>
             <tr>
               <td>ゲストSHOT</td>
-              <td>1000円</td>
+              <td class="price-cell" data-price="1000"></td>
               <td>
                 <div class="btns">
                   <button data-item="guestshot" data-delta="1">+</button>
@@ -377,7 +382,7 @@
             </tr>
             <tr>
               <td>カラオケ5曲</td>
-              <td>1000円</td>
+              <td class="price-cell" data-price="1000"></td>
               <td>
                 <div class="btns">
                   <button data-item="karaoke" data-delta="1">+</button>
@@ -520,6 +525,18 @@
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+
+      /**
+       * テーブル内の価格セルにフォーマットされた価格を設定する
+       */
+      function initializePriceDisplays() {
+          document.querySelectorAll('#drinkTable .price-cell').forEach(cell => {
+              const price = parseInt(cell.dataset.price);
+              if (!isNaN(price)) {
+                  cell.textContent = `${formatNumber(price)}円`;
+              }
+          });
       }
 
       // === 主なロジック関数 ===
@@ -913,6 +930,7 @@
 
       // === 初期化処理 ===
       document.addEventListener('DOMContentLoaded', () => {
+        initializePriceDisplays(); // ドリンクの価格表示を初期化時にフォーマット
         registerEventListeners(); // イベントリスナーを登録
         updateNow(); // 現在時刻の表示
         calculateTotal(); // 合計金額の計算と表示更新
