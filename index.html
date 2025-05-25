@@ -238,10 +238,6 @@
         font-size: 10px;
         padding: 2px 4px;
       }
-      .time-tracker button {
-        font-size: 11px;
-        padding: 6px 10px;
-      }
       /* レスポンシブ時の入力欄フォントサイズも16px以上に保つ */
       .new-drink-row input[type="text"],
       .new-drink-row input[type="number"] {
@@ -325,7 +321,6 @@
     .fixed-buttons-container .navigate-button {
         background-color: #007bff; /* 青色 */
     }
-
   </style>
 
   <link rel="manifest" href="./manifest.json">
@@ -458,10 +453,8 @@
       drinkTotal += (prices[id] || 0) * (quantities[id] || 0);
       const totalElementId = document.getElementById(id + '_total');
       const qtyElementId = document.getElementById(id + '_qty');
-      if (totalElementId && qtyElementId) {
-        totalElementId.innerText = `${formatNumber(prices[id] * quantities[id])}円`;
-        qtyElementId.innerText = quantities[id];
-      }
+      if (totalElementId) totalElementId.innerText = `${formatNumber(prices[id] * quantities[id])}円`;
+      if (qtyElementId) qtyElementId.innerText = quantities[id];
     });
 
     const subtotal = setTotal + drinkTotal; // 小計 (セット料金 + ドリンク合計)
@@ -472,13 +465,22 @@
 
     const tax = Math.floor(subtotalWithService * 0.10); // サービス料を含んだ金額に対して消費税を計算
 
-    const finalTotal = subtotalWithService + tax; // 最終的な合計金額
+    let finalTotal = subtotalWithService + tax; // 最終的な合計金額
+
+    // *** ここから百円単位四捨五入のロジックを追加 ***
+    finalTotal = Math.round(finalTotal / 100) * 100;
+    // *** ここまで百円単位四捨五入のロジックを追加 ***
 
     // メイン画面の表示更新
+    document.getElementById('set1_qty').innerText = quantities.set1; // 手動セットAの数量も更新
     document.getElementById('set1_total').innerText = `${formatNumber(prices.set1 * quantities.set1)}円`; // 手動セットA
+    document.getElementById('set2_qty').innerText = quantities.set2; // 手動セットBの数量も更新
     document.getElementById('set2_total').innerText = `${formatNumber(prices.set2 * quantities.set2)}円`; // 手動セットB
+    document.getElementById('ldrink_qty').innerText = quantities.ldrink; // Lドリンクの数量も更新
     document.getElementById('ldrink_total').innerText = `${formatNumber(prices.ldrink * quantities.ldrink)}円`;
+    document.getElementById('megadrink_qty').innerText = quantities.megadrink; // メガドリンクの数量も更新
     document.getElementById('megadrink_total').innerText = `${formatNumber(prices.megadrink * quantities.megadrink)}円`;
+    document.getElementById('shot_qty').innerText = quantities.shot; // ショットの数量も更新
     document.getElementById('shot_total').innerText = `${formatNumber(prices.shot * quantities.shot)}円`;
 
     // 「現在の状況」セクションの会計金額合計を更新
@@ -531,9 +533,7 @@
 
   // カスタムドリンクの数量調整 (実際の会計用)
   function adjustNewDrink(id, delta) {
-    const nameInput = document.getElementById(`${id}_name`);
     const priceInput = document.getElementById(`${id}_price`);
-    const name = nameInput.value.trim();
     const price = parseInt(priceInput.value);
 
     // 名前の入力は必須ではないが、価格が正しく入力されているかを確認

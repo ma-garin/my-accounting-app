@@ -449,8 +449,11 @@
 
     const simTax = Math.floor(simSubtotalWithService * 0.10); // サービス料を含んだ金額に対して消費税を計算
 
-    // 最終合計がNaNになるのを防ぐため、NaNチェックを追加
-    const simFinalTotal = (isNaN(simSubtotalWithService + simTax)) ? 0 : simSubtotalWithService + simTax;
+    let simFinalTotal = (isNaN(simSubtotalWithService + simTax)) ? 0 : simSubtotalWithService + simTax;
+
+    // *** ここから百円単位四捨五入のロジックを追加 ***
+    simFinalTotal = Math.round(simFinalTotal / 100) * 100;
+    // *** ここまで百円単位四捨五入のロジックを追加 ***
 
     // シミュレーション画面の表示更新
     document.getElementById('sim_set1_total').innerText = `${formatNumber((simPrices.sim_set1 || 0) * (simQuantities.sim_set1 || 0))}円`;
