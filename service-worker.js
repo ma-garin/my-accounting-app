@@ -8,26 +8,25 @@ const CACHE_NAME = 'my-accounting-app-v2.2'; // 新しいバージョンに変�
 const urlsToCache = [
   '/', // トップページ
   'index.html', // メインのHTMLファイル (会計画面)
-  'simulation.html', // 新しく追加したシミュレーション画面
+  'simulation.html', // シミュレーション画面
   'manifest.json', // PWAの設定ファイル
   'service-worker.js', // このService Worker自身もキャッシュ
   // アイコンファイルは、正しくパスが指定されているか確認してください
   'icons/icon-192x192.png',
   'icons/icon-512x512.png'
-  // もし他にCSSファイルやJavaScriptファイルがあればここに追加
-  // 'css/style.css',
-  // 'js/script.js'
 ];
 
 // インストールイベント: Service Workerがインストールされたときに実行されます。
 // ここで、指定したファイルをキャッシュに保存します。
 self.addEventListener('install', (event) => {
+  console.log('Service Worker: Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
+        console.log('Service Worker: Opened cache');
         return cache.addAll(urlsToCache);
       })
+      .then(() => self.skipWaiting()) // インストール後、すぐに待機状態をスキップしてアクティブ化
   );
 });
 
@@ -62,19 +61,20 @@ self.addEventListener('fetch', (event) => {
 });
 
 // アクティベートイベント: 新しいService Workerがアクティブになったときに実行されます。
-// ここで、古いキャッシュを削除します。
+// ここで、古いキャッシュを削除し、クライアントに制御を要求します。
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker: Activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           // 現在のキャッシュ名と異なるキャッシュを削除
           if (cacheName !== CACHE_NAME && cacheName.startsWith('my-accounting-app-')) {
-            console.log('Deleting old cache:', cacheName);
+            console.log('Service Worker: Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim()) // 新しいService Workerが既存のタブも制御する
   );
 });
