@@ -11,97 +11,41 @@
   <link rel="apple-touch-icon" href="icons/icon-192x192.png">
 
   <style>
-    /* 基本スタイル */
     body {
       font-family: 'Helvetica Neue', sans-serif;
       margin: 0;
       padding: 15px;
       background-color: #f9f9f9;
       color: #333;
-      padding-bottom: 70px; /* 下部固定ボタンのためのスペース */
+      padding-bottom: 70px; /* 下部ボタンのためのスペース */
       position: relative;
-      line-height: 1.5; /* 行の高さを調整 */
-    }
+      line-height: 1.5;
 
-    /* 各セクションのタイトル */
+      /* === 背景画像の設定 === */
+      background-image: url('https://pbs.twimg.com/profile_images/1244998649316143105/UC0d5YrU_400x400.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
     h2, h3, h4 {
       text-align: center;
       margin-top: 20px;
       margin-bottom: 15px;
-      color: #0056b3; /* タイトル色 */
+      color: #0056b3;
     }
-
-    /* メインコンテナ */
     .container {
-      max-width: 500px; /* スマートフォンでの見やすさを維持 */
+      max-width: 500px;
       margin: auto;
-      background: #fff;
+      background: rgba(255, 255, 255, 0.9); /* 白の半透明背景でコンテンツを読みやすく */
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       padding: 15px;
-      overflow-x: hidden; /* 横スクロール防止 */
     }
 
     /* 各セクションの余白調整 */
-    .time-tracker, #drinkTable, .summary-table, #addMoreDrink, .quick-add-buttons {
+    .time-tracker, .summary-table {
       margin-bottom: 25px;
-    }
-
-    /* === テーブルの基本スタイル === */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 15px;
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #e2e2e2;
-      color: #555;
-    }
-
-    /* ボタンのスタイル */
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background-color 0.2s ease;
-      white-space: nowrap; /* ボタン内のテキストの折り返し防止 */
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    button:active {
-      background-color: #004085;
-    }
-
-    .btns {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 5px; /* ボタン間のスペース */
-    }
-
-    .btns button {
-      padding: 5px 10px;
-      font-size: 0.9rem;
-    }
-
-    .btns span {
-      min-width: 20px;
-      text-align: center;
-      font-weight: bold;
     }
 
     /* === 時間管理セクション === */
@@ -112,21 +56,17 @@
       padding: 8px 0;
       border-bottom: 1px solid #eee;
     }
-
     .time-tracker div:last-child {
       border-bottom: none;
     }
-
     .time-tracker label {
       font-weight: bold;
       color: #555;
     }
-
     .time-tracker span, .time-tracker button {
       font-size: 1.1rem;
       color: #333;
     }
-
     .time-buttons {
       display: flex;
       flex-wrap: wrap; /* ボタンが多ければ折り返す */
@@ -134,92 +74,264 @@
       gap: 10px; /* ボタン間のスペース */
       margin-top: 20px;
     }
-
     .time-buttons button {
-      flex: 1 1 45%; /* 2列表示にするための幅 */
-      max-width: 150px; /* ボタンの最大幅を制限 */
+      flex: 1 1 calc(50% - 5px); /* 2列表示で均等に、flex-growとflex-shrinkを有効に */
+      /* max-width: 150px; /* これを削除 */
       padding: 10px 10px; /* ボタンのパディング */
       font-size: 0.95rem; /* フォントサイズ */
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      white-space: nowrap;
+    }
+    .time-buttons button:hover { background-color: #0056b3; }
+    .time-buttons button:active { background-color: #004085; }
+
+    /* === ドリンクリストコンテナ (主要ドリンク用) === */
+    #drinkListContainer {
+      display: grid; /* CSS Grid を使用 */
+      gap: 12px; /* カード間のスペース */
+      margin-bottom: 25px;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 2列表示 (スマホでは1列に自動調整) */
     }
 
-
-    /* === 会計サマリーテーブル === */
-    .summary-table td:nth-child(1) {
-      text-align: left;
+    /* === ドリンクカードのスタイル (主要ドリンク用) === */
+    .drink-card {
+      background-color: rgba(240, 248, 255, 0.95); /* カードの背景色を半透明に */
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      display: grid; /* カード内部のレイアウトもグリッド */
+      grid-template-columns: 1fr auto; /* 項目名・価格が左、数量・合計が右 */
+      grid-template-rows: auto auto; /* 項目名・数量が上、価格・合計が下 */
+      align-items: center;
+      gap: 5px 10px; /* 行間と列間のギャップを調整 */
+    }
+    .drink-item-name {
       font-weight: bold;
-      color: #555;
+      font-size: 1rem; /* 少し小さく */
+      color: #0056b3;
+      grid-column: 1 / 2;
+      grid-row: 1 / 2;
+      text-align: left;
+      white-space: nowrap; /* 折り返しなし */
+      overflow: hidden;
+      text-overflow: ellipsis; /* 省略記号 */
+      min-width: 0;
     }
-    .summary-table td:nth-child(2) {
-      text-align: right;
+    .drink-item-price {
+      font-size: 0.85rem; /* 少し小さく */
+      color: #555;
+      grid-column: 1 / 2;
+      grid-row: 2 / 3;
+      text-align: left;
+    }
+    .drink-quantity-control {
+      grid-column: 2 / 3;
+      grid-row: 1 / 2;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 2px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .drink-quantity-control button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      transition: background-color 0.2s;
+      flex-shrink: 0;
+    }
+    .drink-quantity-control button:hover { background-color: #0056b3; }
+    .drink-quantity-control button:active { background-color: #004085; }
+    .drink-current-quantity {
+      font-size: 1rem;
       font-weight: bold;
       color: #333;
+      min-width: 25px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .drink-item-total {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #d9534f;
+      grid-column: 2 / 3;
+      grid-row: 2 / 3;
+      text-align: right;
     }
 
-    /* === カスタムドリンク === */
-    .new-drink-row input[type="text"] {
-        width: 80%; /* ドリンク名入力欄の幅 */
+    /* === アコーディオン部分 === */
+    .accordion-header {
+      background-color: rgba(224, 224, 224, 0.9); /* ヘッダーの背景色を半透明に */
+      color: #333;
+      padding: 10px 15px;
+      margin-top: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    .accordion-header:hover { background-color: #d0d0d0; }
+    .accordion-header::after {
+      content: '▼';
+      font-size: 0.8em;
+      transition: transform 0.2s;
+    }
+    .accordion-header.active::after {
+      content: '▲';
+      transform: rotate(0deg);
+    }
+    .accordion-content {
+      background-color: rgba(255, 255, 255, 0.95); /* コンテンツの背景色を半透明に */
+      border: 1px solid #e0e0e0;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 10px;
+      display: none;
+      overflow: hidden;
+    }
+    .accordion-content.open {
+      display: block; /* ブロック要素で表示 */
+      padding-top: 5px; /* 上部パディングを調整 */
+    }
+
+    /* === アコーディオン内のリスト形式 === */
+    .accordion-item {
+      display: flex; /* Flexboxで横並び */
+      align-items: center;
+      justify-content: space-between; /* 両端寄せ */
+      padding: 8px 5px; /* 上下パディング */
+      border-bottom: 1px solid #eee; /* アイテム間の区切り線 */
+    }
+    .accordion-item:last-child {
+      border-bottom: none; /* 最後の子には線なし */
+    }
+    .accordion-item-info {
+      display: flex;
+      flex-direction: column; /* 項目名と価格を縦に */
+      text-align: left;
+      flex-grow: 1; /* スペースを占有 */
+      padding-right: 10px; /* 右側に少し余白 */
+    }
+    .accordion-item-name {
+      font-weight: bold;
+      font-size: 0.95rem;
+      color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .accordion-item-price {
+      font-size: 0.8rem;
+      color: #666;
+    }
+    /* === アコーディオン内の数量コントロール（スピンボタン） === */
+    .accordion-item-control {
+      display: flex;
+      align-items: center;
+      gap: 3px; /* ボタンと数字の間隔を調整 */
+      flex-shrink: 0; /* 縮まない */
+    }
+    .accordion-item-control .plus-button,
+    .accordion-item-control .minus-button {
+        background-color: #007bff; /* 青色 */
+        color: white;
+        border: none;
+        border-radius: 4px; /* 四角いボタン */
+        width: 28px; /* ボタンのサイズ */
+        height: 28px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.1rem; /* +/- のサイズ */
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        transition: background-color 0.2s;
+        flex-shrink: 0;
+    }
+    .accordion-item-control .plus-button:hover,
+    .accordion-item-control .minus-button:hover { background-color: #0056b3; }
+    .accordion-item-quantity {
+      font-size: 1rem;
+      font-weight: bold;
+      min-width: 25px; /* 数字表示の最小幅 */
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .accordion-item-total {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #d9534f;
+      min-width: 50px; /* 合計金額の最小幅 */
+      text-align: right;
+      margin-left: 10px; /* 数量と合計の間隔 */
+    }
+
+    /* === カスタムドリンク入力フィールドのスタイル === */
+    .custom-drink-item .custom-drink-name-input {
+        width: 100%; /* 親要素の幅いっぱいに */
         padding: 5px;
         border: 1px solid #ccc;
         border-radius: 4px;
+        box-sizing: border-box; /* パディングとボーダーを幅に含める */
+        margin-bottom: 5px; /* 下に少し余白 */
     }
-
-    .new-drink-row input[type="number"] {
-        width: 60px; /* 金額入力欄の幅 */
+    .custom-drink-item .custom-drink-price-input {
+        width: 80px; /* 金額入力の幅を固定 */
         padding: 5px;
         border: 1px solid #ccc;
         border-radius: 4px;
         text-align: right;
+        box-sizing: border-box;
     }
-
-    /* ドリンク簡易追加ボタンのセクション */
-    .quick-add-buttons {
-      display: flex;
-      flex-wrap: wrap; /* ボタンが多ければ折り返す */
-      justify-content: center;
-      gap: 10px; /* ボタン間のスペース */
-      margin-top: 20px;
-      margin-bottom: 20px; /* 他のセクションとの間隔 */
-    }
-
-    .quick-add-buttons button {
-      flex-basis: calc(50% - 5px); /* 2列表示にするための幅 */
-      max-width: 200px; /* ボタンの最大幅を制限 */
-      padding: 12px 10px; /* ボタンのパディング */
-      font-size: 0.95rem; /* フォントサイズ */
-      background-color: #28a745; /* 緑色系のボタン */
-    }
-
-    .quick-add-buttons button:hover {
-      background-color: #218838;
+    .custom-drink-item .accordion-item-info {
+        flex-direction: column; /* 名前と金額を縦に並べる */
+        align-items: flex-start; /* 左寄せ */
     }
 
 
-    /* 下部固定ボタン */
-    .fixed-bottom-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: #f0f0f0;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-      padding: 10px 15px;
-      display: flex;
-      justify-content: space-around; /* 均等配置 */
-      align-items: center;
-      box-sizing: border-box;
-      z-index: 1000; /* 他の要素より手前に表示 */
-      max-width: 500px; /* 中央揃えのために設定 */
-      left: 50%;
-      transform: translateX(-50%);
-      gap: 8px; /* ボタン間のスペース */
+    /* === 会計サマリーテーブル === */
+    .summary-table {
+        width: 100%; /* テーブルの幅を親要素に合わせる */
+        border-collapse: collapse;
+        margin-bottom: 15px;
     }
+    .summary-table td:nth-child(1) {
+      text-align: left; /* 1列目は左揃え */
+      font-weight: bold;
+      color: #555;
+      padding: 8px; /* パディングを追加 */
+      border: 1px solid #ddd; /* ボーダーを追加 */
+    }
+    .summary-table td:nth-child(2) {
+      text-align: right; /* 2列目は右揃え */
+      font-weight: bold;
+      color: #333;
+      padding: 8px; /* パディングを追加 */
+      border: 1px solid #ddd; /* ボーダーを追加 */
+    }
+    /* テーブルのヘッダーがないため、tdに直接ボーダーとパディングを設定 */
 
-    .fixed-bottom-bar button {
-      flex-grow: 1; /* 均等に幅を広げる */
-      flex-basis: calc(33.33% - 8px); /* 3列表示のための幅 */
-      padding: 10px 15px; /* パディングを調整 */
-      font-size: 0.95rem; /* フォントサイズを調整 */
-    }
 
     /* 現在の総計を強調 */
     #current_grand_total {
@@ -251,7 +363,6 @@
       border-radius: 8px;
       font-weight: bold;
     }
-
     #updateNotification button {
       background-color: #007bff;
       color: white;
@@ -260,6 +371,69 @@
       border-radius: 5px;
       margin-left: 10px;
       cursor: pointer;
+    }
+
+    /* === 下部固定ボタンのスタイル === */
+    .fixed-bottom-bar {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(0, 86, 179, 0.95); /* 不透明度を高くして見やすく */
+      padding: 10px 8px;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.15);
+      z-index: 1000;
+      gap: 5px;
+      max-width: 500px; /* 中央揃えのために設定 */
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .fixed-bottom-bar button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      flex-grow: 1;
+      flex-basis: 0;
+      white-space: nowrap;
+    }
+    .fixed-bottom-bar button:hover { background-color: #0056b3; }
+    .fixed-bottom-bar button:active { background-color: #004085; }
+
+    /* === レスポンシブデザイン === */
+    /* 画面幅が400px以下の場合、1列表示に自動調整 */
+    @media (max-width: 399px) {
+        #drinkListContainer {
+            grid-template-columns: 1fr; /* 1列 */
+        }
+        .drink-card {
+            padding: 10px; /* パディングをさらに小さく */
+            gap: 5px 8px;
+        }
+        .drink-item-name { font-size: 0.95rem; }
+        .drink-item-price { font-size: 0.8rem; }
+        .drink-current-quantity { font-size: 0.95rem; min-width: 20px;}
+        .drink-quantity-control button {
+            width: 24px;
+            height: 24px;
+            font-size: 1.1rem;
+        }
+        .drink-item-total { font-size: 1.05rem; }
+
+        /* アコーディオン内のリストも調整 */
+        .accordion-item-info { flex-grow: 1; }
+        .accordion-item-control { gap: 3px; }
+        .accordion-item-control .plus-button,
+        .accordion-item-control .minus-button { width: 24px; height: 24px; font-size: 1rem; }
+        .accordion-item-quantity { font-size: 0.9rem; min-width: 20px; }
+        .accordion-item-total { font-size: 0.95rem; min-width: 45px; }
     }
 
     /* レスポンシブ対応 (デスクトップなど広い画面用) */
@@ -322,102 +496,22 @@
       </section>
 
       <section id="drinkAccount">
-        <h3>ドリンク会計</h3>
-        <table id="drinkTable">
-          <thead>
-            <tr>
-              <th>項目</th>
-              <th>価格</th>
-              <th>数量</th>
-              <th>合計</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Lドリンク</td>
-              <td class="price-cell" data-price="1700"></td> <td>
-                <div class="btns">
-                  <button data-item="ldrink" data-delta="1">+</button>
-                  <span id="ldrink_qty">0</span>
-                  <button data-item="ldrink" data-delta="-1">-</button>
-                </div>
-              </td>
-              <td id="ldrink_total">0円</td>
-            </tr>
-            <tr>
-              <td>メガドリンク</td>
-              <td class="price-cell" data-price="3700"></td>
-              <td>
-                <div class="btns">
-                  <button data-item="megadrink" data-delta="1">+</button>
-                  <span id="megadrink_qty">0</span>
-                  <button data-item="megadrink" data-delta="-1">-</button>
-                </div>
-              </td>
-              <td id="megadrink_total">0円</td>
-            </tr>
-            <tr>
-              <td>SHOT</td>
-              <td class="price-cell" data-price="1500"></td>
-              <td>
-                <div class="btns">
-                  <button data-item="shot" data-delta="1">+</button>
-                  <span id="shot_qty">0</span>
-                  <button data-item="shot" data-delta="-1">-</button>
-                </div>
-              </td>
-              <td id="shot_total">0円</td>
-            </tr>
-            <tr>
-              <td>ゲストSHOT</td>
-              <td class="price-cell" data-price="1000"></td>
-              <td>
-                <div class="btns">
-                  <button data-item="guestshot" data-delta="1">+</button>
-                  <span id="guestshot_qty">0</span>
-                  <button data-item="guestshot" data-delta="-1">-</button>
-                </div>
-              </td>
-              <td id="guestshot_total">0円</td>
-            </tr>
-            <tr>
-              <td>カラオケ5曲</td>
-              <td class="price-cell" data-price="1000"></td>
-              <td>
-                <div class="btns">
-                  <button data-item="karaoke" data-delta="1">+</button>
-                  <span id="karaoke_qty">0</span>
-                  <button data-item="karaoke" data-delta="-1">-</button>
-                </div>
-              </td>
-              <td id="karaoke_total">0円</td>
-            </tr>
-          </tbody>
-        </table>
+        <h3>主要ドリンク</h3>
+        <div id="drinkListContainer">
+          </div>
+      </section>
 
-        <div class="quick-add-buttons">
-          <button data-item="ldrink" data-delta="1">Lドリンク +1</button>
-          <button data-item="megadrink" data-delta="1">メガドリンク +1</button>
-          <button data-item="shot" data-delta="1">SHOT +1</button>
-          <button data-item="guestshot" data-delta="1">ゲストSHOT +1</button>
-          <button data-item="karaoke" data-delta="1">カラオケ +1</button>
+      <section id="otherDrinksSection">
+        <div class="accordion-header" id="otherDrinksAccordionHeader">
+          その他のドリンク
         </div>
-
-        <h4>カスタムドリンク</h4>
-        <table id="addMoreDrink">
-          <thead>
-            <tr>
-              <th>ドリンク名</th>
-              <th>金額</th>
-              <th>数量</th>
-              <th>合計</th>
-            </tr>
-          </thead>
-          <tbody id="newDrinkRows">
-            </tbody>
-        </table>
-        <div class="quick-add-buttons" style="text-align: center;">
-          <button id="addNewDrinkRowButton">カスタムドリンク追加</button>
+        <div class="accordion-content" id="otherDrinksAccordionContent">
+          <h4 style="text-align: left; margin-top: 15px; margin-bottom: 10px; color: #0056b3;">カスタムドリンク</h4>
+          <div id="newDrinkRowsContainer">
+            </div>
+          <div style="text-align: center; margin-top: 15px;">
+            <button id="addNewDrinkRowButton" style="background-color: #28a745;">カスタムドリンク追加</button>
+          </div>
         </div>
       </section>
 
@@ -454,9 +548,9 @@
   </div>
 
   <div class="fixed-bottom-bar">
-    <button id="resetAllButton">すべてリセット</button>
-    <button onclick="window.location.href='simulation.html'">金額シミュレーション</button>
-    <button onclick="window.location.href='menu.html'">メニュー画面</button>
+    <button id="resetAllButton">リセット</button>
+    <button onclick="window.location.href='simulation.html'">シミュレーション</button>
+    <button onclick="window.location.href='menu.html'">メニュー</button>
   </div>
 
   <script>
@@ -473,6 +567,16 @@
       const SERVICE_CHARGE_RATE = 0.10; // サービス料率
       const TAX_RATE = 0.10; // 消費税率
 
+      // ドリンクデータ（元のpricesとquantitiesを統合し、typeを追加）
+      const drinks = [
+        { id: 'ldrink', name: 'Lドリンク', price: 1700, type: 'main' },
+        { id: 'megadrink', name: 'メガドリンク', price: 3700, type: 'main' },
+        { id: 'shot', name: 'SHOT', price: 1500, type: 'other' },
+        { id: 'guestshot', name: 'ゲストSHOT', price: 1000, type: 'other' },
+        { id: 'karaoke', name: 'カラオケ5曲', price: 1000, type: 'other' },
+        // カスタムドリンクは動的に追加されるため、初期データには含めない
+      ];
+
       // === DOM要素のキャッシュ ===
       const nowElement = document.getElementById('now');
       const startElement = document.getElementById('start');
@@ -487,16 +591,18 @@
       const serviceElement = document.getElementById('service');
       const taxElement = document.getElementById('tax');
       const grandTotalSummaryElement = document.getElementById('grand_total_summary');
-      const newDrinkRowsContainer = document.getElementById('newDrinkRows');
+
+      const mainDrinksContainer = document.getElementById('drinkListContainer');
+      const otherDrinksContainer = document.getElementById('otherDrinksAccordionContent');
+      // customDrinkRowsContainerはrenderAllDrinkUIs内で取得し直す
 
       const updateNotification = document.getElementById('updateNotification');
       const updateButton = document.getElementById('updateButton');
 
       // === 状態変数 ===
-      const prices = { ldrink: 1700, megadrink: 3700, shot: 1500, guestshot: 1000, karaoke: 1000 };
-      const quantities = { ldrink: 0, megadrink: 0, shot: 0, guestshot: 0, karaoke: 0 };
+      let drinkQuantities = {}; // 全ドリンクの数量を管理
       let newDrinkCount = 0; // 現在追加されているカスタムドリンクの数
-      let newDrinkIds = []; // カスタムドリンクのIDを管理する配列
+      let newDrinkDefinitions = {}; // カスタムドリンクの定義（ID, 名前, 価格）を管理
 
       let intervalId = null; // updateNow関数を呼び出すインターバルID
       let sessionStartTimestamp = null; // 最初に「開始」ボタンを押したセッション開始時刻のタイムスタンプ
@@ -527,85 +633,236 @@
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
       }
 
+      // === ドリンクUI生成関数 ===
+
       /**
-       * テーブル内の価格セルにフォーマットされた価格を設定する
+       * ドリンクカードを生成するヘルパー関数 (主要ドリンク用)
+       * @param {object} drink - ドリンクの定義オブジェクト
+       * @returns {HTMLElement} 生成されたカード要素
        */
-      function initializePriceDisplays() {
-          document.querySelectorAll('#drinkTable .price-cell').forEach(cell => {
-              const price = parseInt(cell.dataset.price);
-              if (!isNaN(price)) {
-                  cell.textContent = `${formatNumber(price)}円`;
-              }
+      function createDrinkCard(drink) {
+        const currentQuantity = drinkQuantities[drink.id] || 0;
+        const card = document.createElement('div');
+        card.classList.add('drink-card');
+        card.dataset.drinkId = drink.id;
+
+        card.innerHTML = `
+          <div class="drink-item-name" title="${drink.name}">${drink.name}</div>
+          <div class="drink-item-price">${formatNumber(drink.price)}円</div>
+          <div class="drink-quantity-control">
+              <button class="plus-button" data-drink-id="${drink.id}">+</button>
+              <span class="drink-current-quantity">${currentQuantity}</span>
+              <button class="minus-button" data-drink-id="${drink.id}">-</button>
+          </div>
+          <div class="drink-item-total">${formatNumber(drink.price * currentQuantity)}円</div>
+        `;
+
+        card.querySelector('.minus-button').addEventListener('click', (event) => {
+          updateDrinkQuantity(event.target.dataset.drinkId, -1);
+        });
+        card.querySelector('.plus-button').addEventListener('click', (event) => {
+          updateDrinkQuantity(event.target.dataset.drinkId, 1);
+        });
+
+        return card;
+      }
+
+      /**
+       * ドリンクリストアイテムを生成するヘルパー関数 (アコーディオン内のリスト用)
+       * @param {object} drink - ドリンクの定義オブジェクト
+       * @returns {HTMLElement} 生成されたリストアイテム要素
+       */
+      function createAccordionListItem(drink) {
+          const currentQuantity = drinkQuantities[drink.id] || 0;
+
+          const item = document.createElement('div');
+          item.classList.add('accordion-item');
+          item.dataset.drinkId = drink.id;
+
+          item.innerHTML = `
+              <div class="accordion-item-info">
+                  <span class="accordion-item-name" title="${drink.name}">${drink.name}</span>
+                  <span class="accordion-item-price">${formatNumber(drink.price)}円</span>
+              </div>
+              <div class="accordion-item-control">
+                  <button class="plus-button" data-drink-id="${drink.id}">+</button>
+                  <span class="accordion-item-quantity">${currentQuantity}</span>
+                  <button class="minus-button" data-drink-id="${drink.id}">-</button>
+              </div>
+              <span class="accordion-item-total">${formatNumber(drink.price * currentQuantity)}円</span>
+          `;
+
+          item.querySelector('.minus-button').addEventListener('click', (event) => {
+              updateDrinkQuantity(event.target.dataset.drinkId, -1);
           });
+          item.querySelector('.plus-button').addEventListener('click', (event) => {
+              updateDrinkQuantity(event.target.dataset.drinkId, 1);
+          });
+
+          return item;
+      }
+
+      /**
+       * カスタムドリンクのリストアイテムを生成する関数
+       * @param {string} id - カスタムドリンクのID
+       * @param {string} name - ドリンク名
+       * @param {number} price - 価格
+       * @returns {HTMLElement} 生成されたリストアイテム要素
+       */
+      function createCustomDrinkListItem(id, name, price) {
+        const currentQuantity = drinkQuantities[id] || 0;
+
+        const item = document.createElement('div');
+        item.classList.add('accordion-item', 'custom-drink-item'); // custom-drink-itemクラスを追加
+        item.dataset.drinkId = id;
+
+        item.innerHTML = `
+            <div class="accordion-item-info">
+                <input type="text" class="custom-drink-name-input" value="${name}" placeholder="ドリンク名" data-drink-id="${id}">
+                <input type="number" class="custom-drink-price-input" value="${price}" placeholder="金額" min="0" data-drink-id="${id}">円
+            </div>
+            <div class="accordion-item-control">
+                <button class="plus-button" data-drink-id="${id}">+</button>
+                <span class="accordion-item-quantity">${currentQuantity}</span>
+                <button class="minus-button" data-drink-id="${id}">-</button>
+            </div>
+            <span class="accordion-item-total">${formatNumber(price * currentQuantity)}円</span>
+        `;
+
+        // イベントリスナーを動的に追加
+        item.querySelector('.custom-drink-name-input').addEventListener('input', (event) => {
+            newDrinkDefinitions[id].name = event.target.value;
+        });
+        item.querySelector('.custom-drink-price-input').addEventListener('input', (event) => {
+            const newPrice = parseInt(event.target.value);
+            newDrinkDefinitions[id].price = isNaN(newPrice) ? 0 : newPrice;
+            updateDrinkQuantity(id, 0); // 価格変更時に合計を更新
+        });
+
+        item.querySelector('.minus-button').addEventListener('click', (event) => {
+            updateDrinkQuantity(event.target.dataset.drinkId, -1);
+        });
+        item.querySelector('.plus-button').addEventListener('click', (event) => {
+            updateDrinkQuantity(event.target.dataset.drinkId, 1);
+        });
+
+        return item;
+      }
+
+      /**
+       * 全てのドリンクUIをレンダリングする
+       */
+      function renderAllDrinkUIs() {
+        mainDrinksContainer.innerHTML = '';
+        otherDrinksContainer.innerHTML = ''; // Clear all content inside the accordion
+
+        // Render main drinks (cards)
+        drinks.filter(d => d.type === 'main').forEach(drink => {
+          drinkQuantities[drink.id] = drinkQuantities[drink.id] || 0;
+          mainDrinksContainer.appendChild(createDrinkCard(drink));
+        });
+
+        // Render other standard drinks (list items inside accordion)
+        drinks.filter(d => d.type === 'other').forEach(drink => {
+          drinkQuantities[drink.id] = drinkQuantities[drink.id] || 0;
+          otherDrinksContainer.appendChild(createAccordionListItem(drink));
+        });
+
+        // Render custom drinks (list items inside accordion)
+        Object.keys(newDrinkDefinitions).forEach(id => {
+            const customDrink = newDrinkDefinitions[id];
+            drinkQuantities[id] = drinkQuantities[id] || 0;
+            otherDrinksContainer.appendChild(createCustomDrinkListItem(id, customDrink.name, customDrink.price));
+        });
+
+        // Add the custom drink section header and button at the end of the accordion content if it's not already there
+        // This part was moved directly into the HTML structure, so no need to re-create it here.
+        // Ensure the button's listener is re-attached if it was removed by innerHTML = ''
+        const addNewDrinkRowButton = document.getElementById('addNewDrinkRowButton');
+        if (addNewDrinkRowButton) {
+            addNewDrinkRowButton.removeEventListener('click', addNewDrinkRow); // Remove old listener
+            addNewDrinkRowButton.addEventListener('click', addNewDrinkRow); // Add new listener
+        }
+
+
+        calculateTotal(); // Recalculate total after rendering all UIs
       }
 
       // === 主なロジック関数 ===
 
       /**
-       * ドリンクの数量を調整し、表示を更新する
-       * @param {string} item - アイテムID (ldrink, shot など)
-       * @param {number} delta - 変更量 (+1 または -1)
+       * ドリンク数量を更新し、UIと合計を再計算する
+       * @param {string} drinkId - ドリンクのID
+       * @param {number} change - 数量の変更量 (+1 または -1)
        */
-      function adjustQuantity(item, delta) {
-        quantities[item] = Math.max(0, quantities[item] + delta);
-        updateItemDisplay(item);
-        calculateTotal();
-      }
+      function updateDrinkQuantity(drinkId, change) {
+        let currentQuantity = drinkQuantities[drinkId] || 0;
+        let newQuantity = currentQuantity + change;
+        if (newQuantity < 0) newQuantity = 0;
+        drinkQuantities[drinkId] = newQuantity; // 内部状態を更新
 
-      /**
-       * 特定のアイテムの数量と合計金額の表示を更新する
-       * @param {string} item - アイテムID
-       */
-      function updateItemDisplay(item) {
-        const qtyElement = document.getElementById(`${item}_qty`);
-        const totalElement = document.getElementById(`${item}_total`);
-        if (qtyElement) qtyElement.innerText = quantities[item];
-        if (totalElement) totalElement.innerText = `${formatNumber(prices[item] * quantities[item])}円`;
+        const drinkDef = drinks.find(d => d.id === drinkId) || newDrinkDefinitions[drinkId];
+        if (!drinkDef) return; // ドリンク定義が見つからない場合は終了
+
+        // UIを更新
+        const card = document.querySelector(`#drinkListContainer .drink-card[data-drink-id="${drinkId}"]`);
+        const accordionItem = document.querySelector(`#otherDrinksAccordionContent .accordion-item[data-drink-id="${drinkId}"]`);
+        const customItem = document.querySelector(`#otherDrinksAccordionContent .custom-drink-item[data-drink-id="${drinkId}"]`); // カスタムドリンクもアコーディオン内
+
+        let quantitySpan;
+        let totalSpan;
+        let priceValue = drinkDef.price; // カスタムドリンクの場合はnewDrinkDefinitionsから価格を取得
+
+        if (card) {
+          quantitySpan = card.querySelector('.drink-current-quantity');
+          totalSpan = card.querySelector('.drink-item-total');
+        } else if (accordionItem) { // 標準のその他のドリンクとカスタムドリンクのどちらもaccordion-item
+          quantitySpan = accordionItem.querySelector('.accordion-item-quantity');
+          totalSpan = accordionItem.querySelector('.accordion-item-total');
+          if (accordionItem.classList.contains('custom-drink-item')) {
+              priceValue = parseInt(accordionItem.querySelector('.custom-drink-price-input').value) || 0;
+          }
+        } else {
+          return;
+        }
+
+        quantitySpan.textContent = newQuantity;
+        totalSpan.textContent = formatNumber(priceValue * newQuantity) + '円';
+
+        calculateTotal(); // 全体の合計を再計算
       }
 
       /**
        * 全ての合計金額を計算し表示を更新する
        */
       function calculateTotal() {
-        // セットAとセットBの固定価格
         const SET_PRICE_A = 2500; // 1セット目の料金
         const SET_PRICE_B = 3000; // 2セット目以降の料金
 
         let calculatedSetTotal = 0;
         if (currentSetCount >= 1) {
-          // 最初のセットはSET_PRICE_A、2セット目以降はSET_PRICE_B
           calculatedSetTotal = SET_PRICE_A + (currentSetCount - 1) * SET_PRICE_B;
         }
 
         let drinkTotal = 0;
-        // 標準ドリンクの合計
-        drinkTotal += prices.ldrink * quantities.ldrink;
-        drinkTotal += prices.megadrink * quantities.megadrink;
-        drinkTotal += prices.shot * quantities.shot;
-        drinkTotal += prices.guestshot * quantities.guestshot;
-        drinkTotal += prices.karaoke * quantities.karaoke;
-
-
-        // カスタムドリンクの合計
-        newDrinkIds.forEach(id => {
-          drinkTotal += (prices[id] || 0) * (quantities[id] || 0);
-          updateItemDisplay(id); // カスタムドリンクも表示更新
+        // 標準ドリンクとカスタムドリンクの合計を計算
+        [...drinks, ...Object.values(newDrinkDefinitions)].forEach(drink => {
+            const quantity = drinkQuantities[drink.id] || 0;
+            const price = (drink.id.startsWith('custom_drink_')) ? (newDrinkDefinitions[drink.id].price || 0) : drink.price;
+            drinkTotal += price * quantity;
         });
 
-        const subtotal = calculatedSetTotal + drinkTotal; // 小計 (セット料金 + ドリンク合計)
-        const service = Math.floor(subtotal * SERVICE_CHARGE_RATE); // サービス料を計算
-        const subtotalWithService = subtotal + service; // サービス料を含んだ金額
-        const tax = Math.floor(subtotalWithService * TAX_RATE); // サービス料を含んだ金額に対して消費税を計算
-        let finalTotal = subtotalWithService + tax; // 最終的な合計金額
+        const subtotal = calculatedSetTotal + drinkTotal;
+        const service = Math.floor(subtotal * SERVICE_CHARGE_RATE);
+        const subtotalWithService = subtotal + service;
+        const tax = Math.floor(subtotalWithService * TAX_RATE);
+        let finalTotal = subtotalWithService + tax;
 
-        // 百円単位四捨五入
         finalTotal = Math.round(finalTotal / 100) * 100;
 
-        // メイン画面の表示更新
         currentGrandTotalElement.innerHTML = `<strong>${formatNumber(finalTotal)}円</strong>`;
-        totalSetsElement.innerText = currentSetCount; // セット数の表示を更新
+        totalSetsElement.innerText = currentSetCount;
 
-        // 会計金額サマリーテーブルの表示更新
         setSumElement.innerText = `${formatNumber(calculatedSetTotal)}円`;
         drinkSumElement.innerText = `${formatNumber(drinkTotal)}円`;
         subtotalSummaryElement.innerText = `${formatNumber(subtotal)}円`;
@@ -620,89 +877,15 @@
       function addNewDrinkRow() {
         if (newDrinkCount < MAX_NEW_DRINKS) {
           newDrinkCount++;
-          const newId = `newdrink${newDrinkCount}`;
-          newDrinkIds.push(newId);
-          // 新しいドリンクの価格と数量を初期化
-          prices[newId] = 0;
-          quantities[newId] = 0;
+          const newId = `custom_drink_${new Date().getTime()}`; // ユニークなIDを生成
+          newDrinkDefinitions[newId] = { id: newId, name: '', price: 0 }; // 新しいカスタムドリンクの定義を追加
+          drinkQuantities[newId] = 0; // 数量を初期化
 
-          const newRow = document.createElement('tr');
-          newRow.className = 'new-drink-row';
-          newRow.innerHTML = `
-            <td><input type="text" id="${newId}_name" placeholder="ドリンク名"></td>
-            <td><input type="number" id="${newId}_price" placeholder="金額" min="0">円</td>
-            <td>
-              <div class="btns">
-                <button data-item="${newId}" data-delta="1">+</button>
-                <span id="${newId}_qty">0</span>
-                <button data-item="${newId}" data-delta="-1">-</button>
-              </div>
-            </td>
-            <td id="${newId}_total">0円</td>
-          `;
-          newDrinkRowsContainer.appendChild(newRow);
-
-          // イベントリスナーを動的に追加
-          const newPriceInput = document.getElementById(`${newId}_price`);
-          newPriceInput.addEventListener('input', () => updateNewDrinkPrice(newId));
-
-          // 追加した行内の +/- ボタンにもイベントリスナーを設定 (イベント委譲の代わりに直接追加)
-          const buttons = newRow.querySelectorAll('.btns button');
-          buttons.forEach(button => {
-            button.addEventListener('click', (event) => {
-              const item = event.target.dataset.item;
-              const delta = parseInt(event.target.dataset.delta);
-              adjustNewDrink(item, delta);
-            });
-          });
+          // renderAllDrinkUIsを呼び出してUI全体を再レンダリング
+          renderAllDrinkUIs();
         } else {
           alert(`追加できるカスタムドリンクは${MAX_NEW_DRINKS}個までです。`);
         }
-      }
-
-      /**
-       * カスタムドリンクの金額入力時の処理
-       * @param {string} id - カスタムドリンクID
-       */
-      function updateNewDrinkPrice(id) {
-        const priceInput = document.getElementById(`${id}_price`);
-        const price = parseInt(priceInput.value);
-        if (!isNaN(price) && price >= 0) {
-          prices[id] = price;
-        } else {
-          prices[id] = 0; // 不正な入力の場合は0に設定
-          priceInput.value = ''; // 入力値をクリア
-        }
-        calculateTotal(); // 価格が変更されたら合計を再計算
-      }
-
-      /**
-       * カスタムドリンクの数量調整
-       * @param {string} id - カスタムドリンクID
-       * @param {number} delta - 変更量 (+1 または -1)
-       */
-      function adjustNewDrink(id, delta) {
-        const priceInput = document.getElementById(`${id}_price`);
-        const price = parseInt(priceInput.value);
-
-        if (isNaN(price) || price < 0) {
-          if (delta > 0) { // プラスしようとしたときに価格が不正
-            alert('カスタムドリンクの金額を半角数字で入力してください。');
-            priceInput.focus();
-            return;
-          }
-        }
-        // 価格が設定されていれば更新、なければ0のまま（減らす場合）
-        prices[id] = !isNaN(price) && price >= 0 ? price : (prices[id] || 0);
-
-        // 数量が未設定の場合初期化
-        if (typeof quantities[id] === 'undefined') {
-          quantities[id] = 0;
-        }
-        quantities[id] = Math.max(0, quantities[id] + delta);
-
-        updateItemDisplay(id); // カスタムドリンクも表示更新
-        calculateTotal();
       }
 
       /**
@@ -714,26 +897,21 @@
 
         if (sessionStartTimestamp) {
           const currentTime = now.getTime();
-          // 現在の経過時間を計算 (一時停止時間を考慮)
           const currentElapsedTime = (currentTime - sessionStartTimestamp) + pausedAccumulatedTime;
 
           elapsedTimeElement.innerText = formatTime(currentElapsedTime);
 
-          // 現在のセット数を計算 (0から開始なので +1 する)
           let newSetCount = Math.floor(currentElapsedTime / SET_DURATION_MS) + 1;
-          if (newSetCount < 1) newSetCount = 1; // 最低1セットは保証
+          if (newSetCount < 1) newSetCount = 1;
 
-          // セット数が増えたら料金を再計算
           if (newSetCount > currentSetCount) {
             currentSetCount = newSetCount;
-            calculateTotal(); // 計算を更新
+            calculateTotal();
           } else if (currentSetCount === 0 && newSetCount === 1) {
-            // 初めて1セット目になった時も再計算 (念のため)
             currentSetCount = newSetCount;
             calculateTotal();
           }
 
-          // 現在のセットの残り時間を計算
           const currentSetElapsedMs = currentElapsedTime % SET_DURATION_MS;
           const remainingMs = SET_DURATION_MS - currentSetElapsedMs;
 
@@ -742,21 +920,18 @@
             const remainingSecs = Math.floor((remainingMs % MS_PER_MINUTE) / MS_PER_SECOND);
             remainingElement.innerText = `${String(remainingMins).padStart(2, '0')}:${String(remainingSecs).padStart(2, '0')}`;
 
-            // 残り時間が5分を切ったらアラートクラスを追加
-            if (remainingMins < 5 && currentSetCount > 0) { // 0セット目にはアラートを出さない
+            if (remainingMins < 5 && currentSetCount > 0) {
               remainingElement.classList.add('alert');
             } else {
               remainingElement.classList.remove('alert');
             }
           } else {
-            // 瞬間的に0以下になる可能性があるので、安全のために表示を調整
-            remainingElement.innerText = "00:00"; // 次のセットに移行する直前
+            remainingElement.innerText = "00:00";
             remainingElement.classList.remove('alert');
           }
         } else {
-          // タイマーが開始されていない場合は経過時間をクリア
           elapsedTimeElement.innerText = '';
-          remainingElement.innerText = ''; // 残り時間もクリア
+          remainingElement.innerText = '';
           remainingElement.classList.remove('alert');
         }
       }
@@ -765,20 +940,19 @@
        * タイマーを開始する
        */
       function startTimer() {
-        if (!intervalId) { // タイマーがまだ動いていない場合のみ開始
+        if (!intervalId) {
           const now = new Date().getTime();
-          if (!sessionStartTimestamp) { // 初めてタイマーを開始する場合
-            sessionStartTimestamp = now; // 実際のセッション開始時刻を記録
-            pausedAccumulatedTime = 0; // 新しいセッションなので一時停止時間はリセット
-            currentSetCount = 1; // 最初のセットとしてカウント
-            startElement.innerText = new Date(sessionStartTimestamp).toLocaleTimeString(); // 開始時刻を表示
+          if (!sessionStartTimestamp) {
+            sessionStartTimestamp = now;
+            pausedAccumulatedTime = 0;
+            currentSetCount = 1;
+            startElement.innerText = new Date(sessionStartTimestamp).toLocaleTimeString();
           } else {
-            // 一時停止からの再開: sessionStartTimestampを、一時停止時間を考慮して調整
             sessionStartTimestamp = now - pausedAccumulatedTime;
           }
-          intervalId = setInterval(updateNow, MS_PER_SECOND); // 1秒ごとに更新
-          updateNow(); // 即座に一度更新
-          calculateTotal(); // タイマー開始時に料金を再計算（セット数も更新）
+          intervalId = setInterval(updateNow, MS_PER_SECOND);
+          updateNow();
+          calculateTotal();
         }
       }
 
@@ -790,9 +964,8 @@
           clearInterval(intervalId);
           intervalId = null;
           if (sessionStartTimestamp) {
-            // 現在の経過時間を計算し、pausedAccumulatedTimeに累積
             pausedAccumulatedTime += (new Date().getTime() - sessionStartTimestamp);
-            sessionStartTimestamp = null; // 開始時間をクリアして停止状態を明確にする
+            sessionStartTimestamp = null;
           }
         }
       }
@@ -801,24 +974,23 @@
        * タイマーを終了する（リセットせず、カウントを止める）
        */
       function endTimer() {
-        pauseTimer(); // タイマーを停止
-        // 時間関連の表示と状態をリセット
+        pauseTimer();
         startElement.innerText = '';
         remainingElement.innerText = '';
         elapsedTimeElement.innerText = '';
         remainingElement.classList.remove('alert');
 
-        sessionStartTimestamp = null; // セッション開始時間をリセット
-        pausedAccumulatedTime = 0; // 一時停止時間もリセット
-        currentSetCount = 0; // セット数をリセット
-        calculateTotal(); // 料金計算も更新（セット数も反映）
+        sessionStartTimestamp = null;
+        pausedAccumulatedTime = 0;
+        currentSetCount = 0;
+        calculateTotal();
       }
 
       /**
-       * タイマーのみをリセットする（料金はそのまま）
+       * タイマーのみをリセットする
        */
       function resetTimer() {
-        endTimer(); // endTimer が多くのリセット処理を行うので呼び出す
+        endTimer();
       }
 
       /**
@@ -827,22 +999,11 @@
       function resetAll() {
         endTimer(); // タイマーを停止し、時間関連の状態をリセット
 
-        // ドリンクの数量をリセット
-        Object.keys(quantities).forEach(key => {
-          if (prices.hasOwnProperty(key)) { // カスタムドリンク以外の既存のドリンクのみ
-            quantities[key] = 0;
-            updateItemDisplay(key);
-          }
-        });
-
-        // カスタムドリンクのリセット
-        newDrinkIds.forEach(id => {
-          delete prices[id];
-          delete quantities[id];
-        });
-        newDrinkIds = [];
+        drinkQuantities = {}; // 全ドリンクの数量をリセット
+        newDrinkDefinitions = {}; // カスタムドリンクの定義をリセット
         newDrinkCount = 0;
-        newDrinkRowsContainer.innerHTML = ''; // 追加されたドリンクの表示をクリア
+
+        renderAllDrinkUIs(); // UIを再レンダリングして数量をリセット
 
         calculateTotal(); // 全てリセット後、会計金額を再計算
       }
@@ -850,14 +1011,14 @@
       /**
        * Service Workerの更新通知バーを表示する
        */
-      let serviceWorkerNewWorker; // Service Workerの新しいインスタンスを保持
+      let serviceWorkerNewWorker;
 
       function showUpdateBar() {
         if (updateNotification && updateButton) {
           updateNotification.style.display = 'block';
           updateButton.addEventListener('click', () => {
             if (serviceWorkerNewWorker) {
-              serviceWorkerNewWorker.postMessage({ action: 'skipWaiting' }); // Service Workerに更新を指示
+              serviceWorkerNewWorker.postMessage({ action: 'skipWaiting' });
             }
           });
         }
@@ -867,7 +1028,6 @@
        * イベントリスナーの登録
        */
       function registerEventListeners() {
-        // iPhone向け：ダブルタップズームを抑制
         document.addEventListener('touchend', function(event) {
             if (event.detail > 1) {
                 event.preventDefault();
@@ -880,22 +1040,14 @@
         document.getElementById('endButton').addEventListener('click', endTimer);
         document.getElementById('resetTimerButton').addEventListener('click', resetTimer);
 
-        // ドリンク数量調整ボタン (イベント委譲) および簡易追加ボタンに対応
-        // #drinkTable と .quick-add-buttons を含む親要素でイベントを捕捉
-        document.querySelector('#drinkAccount').addEventListener('click', (event) => { // 親要素を #drinkAccount に変更
-          const button = event.target.closest('button[data-item]');
-          if (button) {
-            const item = button.dataset.item;
-            const delta = parseInt(button.dataset.delta);
-            adjustQuantity(item, delta);
-          }
-        });
-
-        // カスタムドリンク追加ボタン
-        document.getElementById('addNewDrinkRowButton').addEventListener('click', addNewDrinkRow);
+        // カスタムドリンク追加ボタンはrenderAllDrinkUIsで再登録されるため、ここでは不要
+        // document.getElementById('addNewDrinkRowButton').addEventListener('click', addNewDrinkRow);
 
         // 全てリセットボタン (下部固定)
         document.getElementById('resetAllButton').addEventListener('click', resetAll);
+
+        // アコーディオン機能の初期化
+        setupAccordion();
 
         // Service Workerの登録
         if ('serviceWorker' in navigator) {
@@ -910,7 +1062,7 @@
                   serviceWorkerNewWorker.addEventListener('statechange', () => {
                     if (serviceWorkerNewWorker.state === 'installed') {
                       if (navigator.serviceWorker.controller) {
-                        showUpdateBar(); // 更新ボタンを表示
+                        showUpdateBar();
                       }
                     }
                   });
@@ -920,7 +1072,6 @@
                 console.log('ServiceWorker registration failed: ', err);
               });
 
-            // 新しいService Workerがアクティブ化されたらページをリロード
             navigator.serviceWorker.addEventListener('controllerchange', () => {
               window.location.reload();
             });
@@ -930,7 +1081,7 @@
 
       // === 初期化処理 ===
       document.addEventListener('DOMContentLoaded', () => {
-        initializePriceDisplays(); // ドリンクの価格表示を初期化時にフォーマット
+        renderAllDrinkUIs(); // 全UIをレンダリング
         registerEventListeners(); // イベントリスナーを登録
         updateNow(); // 現在時刻の表示
         calculateTotal(); // 合計金額の計算と表示更新
@@ -940,6 +1091,17 @@
       setInterval(() => {
         nowElement.innerText = new Date().toLocaleTimeString();
       }, MS_PER_SECOND);
+
+      // アコーディオン機能の初期化
+      function setupAccordion() {
+        const header = document.getElementById('otherDrinksAccordionHeader');
+        const content = document.getElementById('otherDrinksAccordionContent');
+
+        header.addEventListener('click', () => {
+          header.classList.toggle('active');
+          content.classList.toggle('open');
+        });
+      }
 
     })(); // 即時関数の終わり
   </script>
