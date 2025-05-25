@@ -1,7 +1,7 @@
 // キャッシュのバージョン名を定義します。
 // アプリを更新するたびにこのバージョン名を変更することで、
 // Service Workerが新しいキャッシュをダウンロードするようにトリガーします。
-const CACHE_NAME = 'my-accounting-app-v2.5'; // バージョンを更新しました
+const CACHE_NAME = 'my-accounting-app-v2.9'; // バージョンを更新しました
 
 // キャッシュするファイルの一覧を定義します。
 // ここに記載されたファイルは、初回アクセス時にキャッシュされます。
@@ -9,12 +9,12 @@ const urlsToCache = [
   '/', // トップページ
   'index.html', // メインのHTMLファイル (会計画面)
   'simulation.html', // シミュレーション画面
-  'menu.html', // ★新しく追加したメニュー画面
   'manifest.json', // PWAの設定ファイル
   'service-worker.js', // このService Worker自身もキャッシュ
   // アイコンファイルは、正しくパスが指定されているか確認してください
   'icons/icon-192x192.png',
-  'icons/icon-512x512.png'
+  'icons/icon-512x512.png',
+  'menu.html' // メニュー画面もキャッシュ対象に追加
 ];
 
 // インストールイベント: Service Workerがインストールされたときに実行されます。
@@ -37,7 +37,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
-        // キャッシュにリクエストがあればそれを返す
+        // キャッシュにリソースがあれば、それを返す
         if (response) {
           return response;
         }
@@ -80,7 +80,7 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// メッセージイベント: ページからService Workerへのメッセージを受け取ります。
+// Service Workerに更新をスキップするメッセージを送信するためのリスナー
 self.addEventListener('message', (event) => {
   if (event.data && event.data.action === 'skipWaiting') {
     self.skipWaiting();

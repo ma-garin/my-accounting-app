@@ -166,6 +166,29 @@
         text-align: right;
     }
 
+    /* ドリンク簡易追加ボタンのセクション */
+    .quick-add-buttons {
+      display: flex;
+      flex-wrap: wrap; /* ボタンが多ければ折り返す */
+      justify-content: center;
+      gap: 10px; /* ボタン間のスペース */
+      margin-top: 20px;
+      margin-bottom: 20px; /* 他のセクションとの間隔 */
+    }
+
+    .quick-add-buttons button {
+      flex-basis: calc(50% - 5px); /* 2列表示にするための幅 */
+      max-width: 200px; /* ボタンの最大幅を制限 */
+      padding: 12px 10px; /* ボタンのパディング */
+      font-size: 0.95rem; /* フォントサイズ */
+      background-color: #28a745; /* 緑色系のボタン */
+    }
+
+    .quick-add-buttons button:hover {
+      background-color: #218838;
+    }
+
+
     /* 下部固定ボタン */
     .fixed-bottom-bar {
       position: fixed;
@@ -176,19 +199,20 @@
       box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
       padding: 10px 15px;
       display: flex;
-      justify-content: space-around;
+      justify-content: space-around; /* 均等配置 */
       align-items: center;
       box-sizing: border-box;
       z-index: 1000; /* 他の要素より手前に表示 */
       max-width: 500px; /* 中央揃えのために設定 */
       left: 50%;
       transform: translateX(-50%);
+      gap: 8px; /* ボタン間のスペース */
     }
 
     .fixed-bottom-bar button {
-      width: 48%; /* 2つのボタンが均等に配置されるように */
-      padding: 12px 0;
-      font-size: 1.1rem;
+      flex-grow: 1; /* 均等に幅を広げる */
+      padding: 10px 15px; /* パディングを調整 */
+      font-size: 0.95rem; /* フォントサイズを調整 */
     }
 
     /* 現在の総計を強調 */
@@ -366,6 +390,14 @@
           </tbody>
         </table>
 
+        <div class="quick-add-buttons">
+          <button data-item="ldrink" data-delta="1">Lドリンク +1</button>
+          <button data-item="megadrink" data-delta="1">メガドリンク +1</button>
+          <button data-item="shot" data-delta="1">SHOT +1</button>
+          <button data-item="guestshot" data-delta="1">ゲストSHOT +1</button>
+          <button data-item="karaoke" data-delta="1">カラオケ +1</button>
+        </div>
+
         <h4>カスタムドリンク</h4>
         <table id="addMoreDrink">
           <thead>
@@ -413,15 +445,12 @@
           </tr>
         </table>
       </section>
-
-      <section id="menuLink" style="text-align: center; margin-top: 30px;">
-        <p><a href="menu.html">メニュー画面へ</a></p>
-      </section>
     </main>
   </div>
 
   <div class="fixed-bottom-bar">
     <button id="resetAllButton">すべてリセット</button>
+    <button onclick="window.location.href='simulation.html'">金額シミュレーション</button>
     <button onclick="window.location.href='menu.html'">メニュー画面</button>
   </div>
 
@@ -459,7 +488,6 @@
       const updateButton = document.getElementById('updateButton');
 
       // === 状態変数 ===
-      // set1とset2は自動計算のみで使用するため、pricesから削除し、setPriceA/Bを直接使用
       const prices = { ldrink: 1700, megadrink: 3700, shot: 1500, guestshot: 1000, karaoke: 1000 };
       const quantities = { ldrink: 0, megadrink: 0, shot: 0, guestshot: 0, karaoke: 0 };
       let newDrinkCount = 0; // 現在追加されているカスタムドリンクの数
@@ -835,8 +863,9 @@
         document.getElementById('endButton').addEventListener('click', endTimer);
         document.getElementById('resetTimerButton').addEventListener('click', resetTimer);
 
-        // ドリンク数量調整ボタン (イベント委譲)
-        document.getElementById('drinkTable').addEventListener('click', (event) => {
+        // ドリンク数量調整ボタン (イベント委譲) および簡易追加ボタンに対応
+        // #drinkTable と .quick-add-buttons を含む親要素でイベントを捕捉
+        document.querySelector('#drinkAccount').addEventListener('click', (event) => { // 親要素を #drinkAccount に変更
           const button = event.target.closest('button[data-item]');
           if (button) {
             const item = button.dataset.item;

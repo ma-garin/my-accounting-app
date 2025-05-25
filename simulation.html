@@ -11,34 +11,39 @@
   <link rel="apple-touch-icon" href="icons/icon-192x192.png">
 
   <style>
+    /* 基本スタイル */
     body {
       font-family: 'Helvetica Neue', sans-serif;
       margin: 0;
       padding: 15px;
       background-color: #f9f9f9;
       color: #333;
-      padding-bottom: 70px; /* 下部ボタンのためのスペース */
+      padding-bottom: 70px; /* 下部固定ボタンのためのスペース */
       position: relative;
       line-height: 1.5; /* 行の高さを調整 */
     }
+
+    /* 各セクションのタイトル */
     h2, h3, h4 {
       text-align: center;
       margin-top: 20px;
       margin-bottom: 15px;
       color: #0056b3; /* タイトル色 */
     }
+
+    /* メインコンテナ */
     .container {
-      max-width: 500px;
+      max-width: 500px; /* スマートフォンでの見やすさを維持 */
       margin: auto;
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       padding: 15px;
-      overflow-x: hidden;
+      overflow-x: hidden; /* 横スクロール防止 */
     }
 
     /* 各セクションの余白調整 */
-    #simulationSetTable, #simulationDrinkTable, #addMoreSimDrink {
+    #simulationSetTable, #simulationDrinkTable, #addMoreSimDrink, .quick-add-buttons {
       margin-bottom: 25px;
     }
 
@@ -70,7 +75,7 @@
       cursor: pointer;
       font-size: 1rem;
       transition: background-color 0.2s ease;
-      white-space: nowrap;
+      white-space: nowrap; /* ボタン内のテキストの折り返し防止 */
     }
 
     button:hover {
@@ -85,7 +90,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 5px;
+      gap: 5px; /* ボタン間のスペース */
     }
 
     .btns button {
@@ -99,27 +104,36 @@
       font-weight: bold;
     }
 
-    /* === シミュレーション設定 === */
-    .sim-settings {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
+    /* シミュレーション固有のスタイル */
+    .time-control-section {
+      text-align: center;
       margin-bottom: 20px;
-      padding: 10px 0;
-      border-bottom: 1px solid #eee;
+      background-color: #eaf4ff;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 
-    .sim-settings label {
-      font-weight: bold;
-      color: #555;
+    #simulated_time_display {
+        font-size: 2.5rem; /* より大きく強調 */
+        font-weight: bold;
+        color: #0056b3;
+        margin-bottom: 15px;
+        display: block; /* 独立したブロックとして表示 */
     }
 
-    .sim-settings input[type="number"] {
-      width: 60px;
-      padding: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      text-align: right;
+    .time-control-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .time-control-buttons button {
+        flex-grow: 1;
+        max-width: 120px;
+        padding: 12px 10px;
+        font-size: 1.1rem;
     }
 
     /* === 会計サマリーテーブル === */
@@ -134,7 +148,20 @@
       color: #333;
     }
 
-    /* === カスタムドリンク === */
+    /* 現在の総計を強調 */
+    #simulation_grand_total {
+      text-align: center;
+      font-size: 2.2rem; /* 大きく強調 */
+      color: #d32f2f; /* 赤色系で目立たせる */
+      padding: 15px 0;
+      background-color: #ffe0b2; /* 背景色を追加 */
+      border-radius: 8px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    /* カスタムドリンク */
     .new-drink-row input[type="text"] {
         width: 80%;
         padding: 5px;
@@ -150,6 +177,28 @@
         text-align: right;
     }
 
+    /* ドリンク簡易追加ボタンのセクション (index.htmlと共通) */
+    .quick-add-buttons {
+      display: flex;
+      flex-wrap: wrap; /* ボタンが多ければ折り返す */
+      justify-content: center;
+      gap: 10px; /* ボタン間のスペース */
+      margin-top: 20px;
+      margin-bottom: 20px; /* 他のセクションとの間隔 */
+    }
+
+    .quick-add-buttons button {
+      flex-basis: calc(50% - 5px); /* 2列表示にするための幅 */
+      max-width: 200px; /* ボタンの最大幅を制限 */
+      padding: 12px 10px; /* ボタンのパディング */
+      font-size: 0.95rem; /* フォントサイズ */
+      background-color: #28a745; /* 緑色系のボタン */
+    }
+
+    .quick-add-buttons button:hover {
+      background-color: #218838;
+    }
+
     /* 下部固定ボタン */
     .fixed-bottom-bar {
       position: fixed;
@@ -160,32 +209,20 @@
       box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
       padding: 10px 15px;
       display: flex;
-      justify-content: space-around;
+      justify-content: space-around; /* 均等配置 */
       align-items: center;
       box-sizing: border-box;
-      z-index: 1000;
-      max-width: 500px;
+      z-index: 1000; /* 他の要素より手前に表示 */
+      max-width: 500px; /* 中央揃えのために設定 */
       left: 50%;
       transform: translateX(-50%);
+      gap: 8px; /* ボタン間のスペース */
     }
 
     .fixed-bottom-bar button {
-      width: 48%;
-      padding: 12px 0;
-      font-size: 1.1rem;
-    }
-
-    /* 現在の総計を強調 */
-    #sim_grand_total {
-      text-align: center;
-      font-size: 2.2rem;
-      color: #d32f2f;
-      padding: 15px 0;
-      background-color: #ffe0b2;
-      border-radius: 8px;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      flex-grow: 1; /* 均等に幅を広げる */
+      padding: 10px 15px; /* パディングを調整 */
+      font-size: 0.95rem; /* フォントサイズを調整 */
     }
 
     /* PWA更新通知バー */
@@ -210,13 +247,13 @@
       cursor: pointer;
     }
 
-    /* レスポンシブ対応 */
+    /* レスポンシブ対応 (デスクトップなど広い画面用) */
     @media (min-width: 600px) {
       .container {
         padding: 25px;
       }
       .fixed-bottom-bar {
-        width: 500px;
+        width: 500px; /* .container と同じ幅 */
       }
     }
   </style>
@@ -232,23 +269,27 @@
     </div>
 
     <main>
-      <section id="simulationTotalSection">
-        <h3>シミュレーション合計金額</h3>
-        <p id="sim_grand_total"><strong>0円</strong></p>
+      <section id="currentTotalSection">
+        <h3>現在の合計金額</h3>
+        <p id="simulation_grand_total"><strong>0円</strong></p>
       </section>
 
-      <section id="simulationSettings">
-        <h3>シミュレーション設定</h3>
-        <div class="sim-settings">
-          <label for="sim_hours">時間(h):</label>
-          <input type="number" id="sim_hours" value="1" min="0">
-          <label for="sim_minutes">分(m):</label>
-          <input type="number" id="sim_minutes" value="0" min="0" max="59">
+      <section id="timeInputSection">
+        <h3>滞在時間</h3>
+        <div class="time-control-section">
+          <span id="simulated_time_display">00:00</span>
+          <div class="time-control-buttons">
+            <button id="add_40_min_button">+40分</button>
+            <button id="subtract_40_min_button">-40分</button>
+            <button id="reset_time_button">時間リセット</button>
+          </div>
         </div>
       </section>
 
-      <section id="simulationDrinkAccount">
-        <h3>ドリンク会計</h3>
+      <section id="simulationItems">
+        <h3>ドリンク・シャンパン会計</h3>
+
+        <h4>ドリンク</h4>
         <table id="simulationDrinkTable">
           <thead>
             <tr>
@@ -265,11 +306,11 @@
               <td>
                 <div class="btns">
                   <button data-item="ldrink" data-delta="1">+</button>
-                  <span id="sim_ldrink_qty">0</span>
+                  <span id="ldrink_qty">0</span>
                   <button data-item="ldrink" data-delta="-1">-</button>
                 </div>
               </td>
-              <td id="sim_ldrink_total">0円</td>
+              <td id="ldrink_total">0円</td>
             </tr>
             <tr>
               <td>メガドリンク</td>
@@ -277,11 +318,11 @@
               <td>
                 <div class="btns">
                   <button data-item="megadrink" data-delta="1">+</button>
-                  <span id="sim_megadrink_qty">0</span>
+                  <span id="megadrink_qty">0</span>
                   <button data-item="megadrink" data-delta="-1">-</button>
                 </div>
               </td>
-              <td id="sim_megadrink_total">0円</td>
+              <td id="megadrink_total">0円</td>
             </tr>
             <tr>
               <td>SHOT</td>
@@ -289,11 +330,11 @@
               <td>
                 <div class="btns">
                   <button data-item="shot" data-delta="1">+</button>
-                  <span id="sim_shot_qty">0</span>
+                  <span id="shot_qty">0</span>
                   <button data-item="shot" data-delta="-1">-</button>
                 </div>
               </td>
-              <td id="sim_shot_total">0円</td>
+              <td id="shot_total">0円</td>
             </tr>
             <tr>
               <td>ゲストSHOT</td>
@@ -301,11 +342,11 @@
               <td>
                 <div class="btns">
                   <button data-item="guestshot" data-delta="1">+</button>
-                  <span id="sim_guestshot_qty">0</span>
+                  <span id="guestshot_qty">0</span>
                   <button data-item="guestshot" data-delta="-1">-</button>
                 </div>
               </td>
-              <td id="sim_guestshot_total">0円</td>
+              <td id="guestshot_total">0円</td>
             </tr>
             <tr>
               <td>カラオケ5曲</td>
@@ -313,13 +354,27 @@
               <td>
                 <div class="btns">
                   <button data-item="karaoke" data-delta="1">+</button>
-                  <span id="sim_karaoke_qty">0</span>
+                  <span id="karaoke_qty">0</span>
                   <button data-item="karaoke" data-delta="-1">-</button>
                 </div>
               </td>
-              <td id="sim_karaoke_total">0円</td>
+              <td id="karaoke_total">0円</td>
             </tr>
           </tbody>
+        </table>
+
+        <h4>シャンパン</h4>
+        <table id="simulationChampagneTable">
+          <thead>
+            <tr>
+              <th>項目</th>
+              <th>価格</th>
+              <th>数量</th>
+              <th>合計</th>
+            </tr>
+          </thead>
+          <tbody id="champagne_table_body">
+            </tbody>
         </table>
 
         <h4>カスタムドリンク</h4>
@@ -348,7 +403,7 @@
             <td id="sim_set_sum">0円</td>
           </tr>
           <tr>
-            <td>ドリンク合計</td>
+            <td>ドリンク・シャンパン合計</td>
             <td id="sim_drink_sum">0円</td>
           </tr>
           <tr>
@@ -369,37 +424,44 @@
           </tr>
         </table>
       </section>
-
-      <section id="menuLink" style="text-align: center; margin-top: 30px;">
-        <p><a href="menu.html">メニュー画面へ</a></p>
-      </section>
     </main>
   </div>
 
   <div class="fixed-bottom-bar">
-    <button id="resetSimulationButton">すべてリセット</button>
+    <button id="resetSimulationButton">シミュレーションをリセット</button>
+    <button onclick="window.location.href='index.html'">会計画面へ</button>
     <button onclick="window.location.href='menu.html'">メニュー画面</button>
   </div>
 
   <script>
-    // 即時関数でスコープを隔離
     (function() {
       // === 定数定義 ===
       const SET_DURATION_MINUTES = 40;
-      const MS_PER_SECOND = 1000;
-      const MS_PER_MINUTE = 60 * MS_PER_SECOND;
-      const MS_PER_HOUR = 60 * MS_PER_MINUTE;
-      const SET_DURATION_MS = SET_DURATION_MINUTES * MS_PER_MINUTE;
+      const SET_PRICE_A = 2500; // 1セット目の料金
+      const SET_PRICE_B = 3000; // 2セット目以降の料金
 
       const MAX_NEW_DRINKS = 5; // 追加できるカスタムドリンクの最大数
       const SERVICE_CHARGE_RATE = 0.10; // サービス料率
       const TAX_RATE = 0.10; // 消費税率
 
-      // === DOM要素のキャッシュ ===
-      const simHoursInput = document.getElementById('sim_hours');
-      const simMinutesInput = document.getElementById('sim_minutes');
+      // シャンパンデータの定義 (menu.htmlからの直接連携がないため、simulation.html内で定義)
+      const champagnes = [
+          { id: 'moet', name: 'モエ', price: 15000 },
+          { id: 'chandon', name: 'モエシャンドン', price: 10000 },
+          { id: 'veuve', name: 'ヴーヴ', price: 20000 },
+          { id: 'p_moet', name: 'Pモエ', price: 30000 },
+          { id: 'belle', name: 'ベルエポック', price: 50000 },
+          { id: 'dompe', name: 'ドンペリ', price: 80000 },
+          { id: 'crystal', name: 'クリスタル', price: 100000 }
+      ];
 
-      const simGrandTotalElement = document.getElementById('sim_grand_total');
+      // === DOM要素のキャッシュ ===
+      const simulatedTimeDisplay = document.getElementById('simulated_time_display');
+      const add40MinButton = document.getElementById('add_40_min_button');
+      const subtract40MinButton = document.getElementById('subtract_40_min_button');
+      const resetTimeButton = document.getElementById('reset_time_button');
+
+      const simulationGrandTotalElement = document.getElementById('simulation_grand_total');
       const simSetSumElement = document.getElementById('sim_set_sum');
       const simDrinkSumElement = document.getElementById('sim_drink_sum');
       const simSubtotalSummaryElement = document.getElementById('sim_subtotal_summary');
@@ -407,16 +469,29 @@
       const simTaxElement = document.getElementById('sim_tax');
       const simGrandTotalSummaryElement = document.getElementById('sim_grand_total_summary');
       const newSimDrinkRowsContainer = document.getElementById('newSimDrinkRows');
+      const champagneTableBody = document.getElementById('champagne_table_body');
 
       const updateNotification = document.getElementById('updateNotification');
       const updateButton = document.getElementById('updateButton');
 
       // === 状態変数 ===
-      // set1とset2は自動計算のみで使用するため、pricesから削除し、setPriceA/Bを直接使用
-      const simPrices = { ldrink: 1700, megadrink: 3700, shot: 1500, guestshot: 1000, karaoke: 1000 };
-      const simQuantities = { ldrink: 0, megadrink: 0, shot: 0, guestshot: 0, karaoke: 0 };
-      let newSimDrinkCount = 0; // 現在追加されているカスタムドリンクの数
-      let newSimDrinkIds = []; // カスタムドリンクのIDを管理する配列
+      let simulatedTotalMinutes = 0; // シミュレーション中の合計滞在時間（分）
+
+      // 通常ドリンクとカスタムドリンクの価格・数量
+      const prices = {
+        ldrink: 1700, megadrink: 3700, shot: 1500, guestshot: 1000, karaoke: 1000
+      };
+      const quantities = {
+        ldrink: 0, megadrink: 0, shot: 0, guestshot: 0, karaoke: 0
+      };
+      let newDrinkCount = 0; // 現在追加されているカスタムドリンクの数
+      let newDrinkIds = []; // カスタムドリンクのIDを管理する配列
+
+      // シャンパンの数量を別途管理
+      const champagneQuantities = {};
+      champagnes.forEach(ch => {
+          champagneQuantities[ch.id] = 0;
+      });
 
       // === ヘルパー関数 ===
 
@@ -429,97 +504,123 @@
         return num.toLocaleString();
       }
 
-      // === 主なロジック関数 ===
-
       /**
-       * シミュレーション用ドリンクの数量を調整し、表示を更新する
-       * @param {string} item - アイテムID (ldrink, shot など)
-       * @param {number} delta - 変更量 (+1 または -1)
+       * 分をHH:MM形式でフォーマットする
+       * @param {number} totalMinutes - 合計分
+       * @returns {string} フォーマットされた時間文字列
        */
-      function adjustSimQuantity(item, delta) {
-        simQuantities[item] = Math.max(0, simQuantities[item] + delta);
-        updateSimItemDisplay(item);
-        calculateSimTotal();
+      function formatMinutesToHHMM(totalMinutes) {
+          const hours = Math.floor(totalMinutes / 60);
+          const minutes = totalMinutes % 60;
+          return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
       }
 
       /**
-       * 特定のシミュレーション用アイテムの数量と合計金額の表示を更新する
+       * 特定のアイテム（通常ドリンク、カスタムドリンク）の数量を調整し、表示を更新する
+       * @param {string} item - アイテムID
+       * @param {number} delta - 変更量 (+1 または -1)
+       */
+      function adjustQuantity(item, delta) {
+        quantities[item] = Math.max(0, quantities[item] + delta);
+        updateItemDisplay(item);
+        calculateSimulationTotal();
+      }
+
+      /**
+       * 特定のシャンパンの数量を調整し、表示を更新する
+       * @param {string} item - シャンパンID (moet, veuve など)
+       * @param {number} delta - 変更量 (+1 または -1)
+       */
+      function adjustChampagneQuantity(item, delta) {
+          champagneQuantities[item] = Math.max(0, champagneQuantities[item] + delta);
+          updateChampagneDisplay(item);
+          calculateSimulationTotal();
+      }
+
+      /**
+       * 特定のアイテムの数量と合計金額の表示を更新する (通常ドリンク、カスタムドリンク)
        * @param {string} item - アイテムID
        */
-      function updateSimItemDisplay(item) {
-        const qtyElement = document.getElementById(`sim_${item}_qty`);
-        const totalElement = document.getElementById(`sim_${item}_total`);
-        if (qtyElement) qtyElement.innerText = simQuantities[item];
-        if (totalElement) totalElement.innerText = `${formatNumber(simPrices[item] * simQuantities[item])}円`;
+      function updateItemDisplay(item) {
+        const qtyElement = document.getElementById(`${item}_qty`);
+        const totalElement = document.getElementById(`${item}_total`);
+        if (qtyElement) qtyElement.innerText = quantities[item];
+        if (totalElement) totalElement.innerText = `${formatNumber(prices[item] * quantities[item])}円`;
+      }
+
+      /**
+       * 特定のシャンパンの数量と合計金額の表示を更新する
+       * @param {string} champagneId - シャンパンID
+       */
+      function updateChampagneDisplay(champagneId) {
+          const qtyElement = document.getElementById(`champagne-qty-${champagneId}`);
+          const totalElement = document.getElementById(`champagne-total-${champagneId}`);
+          const champagnePrice = champagnes.find(ch => ch.id === champagneId)?.price || 0;
+
+          if (qtyElement) qtyElement.innerText = champagneQuantities[champagneId];
+          if (totalElement) totalElement.textContent = `${formatNumber(champagnePrice * champagneQuantities[champagneId])}円`;
       }
 
       /**
        * シミュレーションの合計金額を計算し表示を更新する
        */
-      function calculateSimTotal() {
-        const simHours = parseInt(simHoursInput.value) || 0;
-        const simMinutes = parseInt(simMinutesInput.value) || 0;
-        const totalSimMinutes = simHours * 60 + simMinutes;
-
-        // シミュレーションでのセット数
-        const simSetCount = Math.floor(totalSimMinutes / SET_DURATION_MINUTES) + 1;
-        const effectiveSimSetCount = Math.max(1, simSetCount); // 最低1セットは保証
-
-        // セットAとセットBの固定価格
-        const SET_PRICE_A = 2500; // 1セット目の料金
-        const SET_PRICE_B = 3000; // 2セット目以降の料金
-
-        let calculatedSimSetTotal = 0;
-        if (effectiveSimSetCount >= 1) {
-          calculatedSimSetTotal = SET_PRICE_A + (effectiveSimSetCount - 1) * SET_PRICE_B;
+      function calculateSimulationTotal() {
+        // 滞在時間（分）に基づいてセット料金を計算
+        let simulatedSetTotal = 0;
+        if (simulatedTotalMinutes > 0) {
+            const totalSets = Math.ceil(simulatedTotalMinutes / SET_DURATION_MINUTES);
+            simulatedSetTotal = SET_PRICE_A + Math.max(0, totalSets - 1) * SET_PRICE_B;
         }
 
-        let simDrinkTotal = 0;
+        let drinkTotal = 0;
         // 標準ドリンクの合計
-        simDrinkTotal += simPrices.ldrink * simQuantities.ldrink;
-        simDrinkTotal += simPrices.megadrink * simQuantities.megadrink;
-        simDrinkTotal += simPrices.shot * simQuantities.shot;
-        simDrinkTotal += simPrices.guestshot * simQuantities.guestshot;
-        simDrinkTotal += simPrices.karaoke * simQuantities.karaoke;
-
-        // カスタムドリンクの合計
-        newSimDrinkIds.forEach(id => {
-          simDrinkTotal += (simPrices[id] || 0) * (simQuantities[id] || 0);
-          updateSimItemDisplay(id); // カスタムドリンクも表示更新
+        Object.keys(quantities).forEach(key => {
+          if (prices.hasOwnProperty(key)) {
+            drinkTotal += prices[key] * quantities[key];
+          }
         });
 
-        const simSubtotal = calculatedSimSetTotal + simDrinkTotal; // 小計
-        const simService = Math.floor(simSubtotal * SERVICE_CHARGE_RATE); // サービス料
-        const simSubtotalWithService = simSubtotal + simService;
-        const simTax = Math.floor(simSubtotalWithService * TAX_RATE); // 消費税
-        let simFinalTotal = simSubtotalWithService + simTax;
+        // カスタムドリンクの合計
+        newDrinkIds.forEach(id => {
+          drinkTotal += (prices[id] || 0) * (quantities[id] || 0);
+        });
+
+        // シャンパンの合計
+        champagnes.forEach(ch => {
+            drinkTotal += ch.price * (champagneQuantities[ch.id] || 0);
+        });
+
+        const subtotal = simulatedSetTotal + drinkTotal; // 小計 (セット料金 + ドリンク・シャンパン合計)
+        const service = Math.floor(subtotal * SERVICE_CHARGE_RATE); // サービス料を計算
+        const subtotalWithService = subtotal + service; // サービス料を含んだ金額
+        const tax = Math.floor(subtotalWithService * TAX_RATE); // サービス料を含んだ金額に対して消費税を計算
+        let finalTotal = subtotalWithService + tax; // 最終的な合計金額
 
         // 百円単位四捨五入
-        simFinalTotal = Math.round(simFinalTotal / 100) * 100;
+        finalTotal = Math.round(finalTotal / 100) * 100;
 
-        // シミュレーション画面の表示更新
-        simGrandTotalElement.innerHTML = `<strong>${formatNumber(simFinalTotal)}円</strong>`;
-
-        // シミュレーションサマリーテーブルの表示更新
-        simSetSumElement.innerText = `${formatNumber(calculatedSimSetTotal)}円`;
-        simDrinkSumElement.innerText = `${formatNumber(simDrinkTotal)}円`;
-        simSubtotalSummaryElement.innerText = `${formatNumber(simSubtotal)}円`;
-        simServiceElement.innerText = `${formatNumber(simService)}円`;
-        simTaxElement.innerText = `${formatNumber(simTax)}円`;
-        simGrandTotalSummaryElement.innerHTML = `<strong>${formatNumber(simFinalTotal)}円</strong>`;
+        // 表示の更新
+        simulatedTimeDisplay.textContent = formatMinutesToHHMM(simulatedTotalMinutes); // 滞在時間表示を更新
+        simulationGrandTotalElement.innerHTML = `<strong>${formatNumber(finalTotal)}円</strong>`;
+        simSetSumElement.innerText = `${formatNumber(simulatedSetTotal)}円`;
+        simDrinkSumElement.innerText = `${formatNumber(drinkTotal)}円`;
+        simSubtotalSummaryElement.innerText = `${formatNumber(subtotal)}円`;
+        simServiceElement.innerText = `${formatNumber(service)}円`;
+        simTaxElement.innerText = `${formatNumber(tax)}円`;
+        simGrandTotalSummaryElement.innerHTML = `<strong>${formatNumber(finalTotal)}円</strong>`;
       }
 
       /**
        * 新しいカスタムドリンク行を追加する (シミュレーション用)
        */
       function addNewSimDrinkRow() {
-        if (newSimDrinkCount < MAX_NEW_DRINKS) {
-          newSimDrinkCount++;
-          const newId = `newsimdrink${newSimDrinkCount}`;
-          newSimDrinkIds.push(newId);
+        if (newDrinkCount < MAX_NEW_DRINKS) {
+          newDrinkCount++;
+          const newId = `sim_newdrink${newDrinkCount}`;
+          newDrinkIds.push(newId);
           // 新しいドリンクの価格と数量を初期化
-          simPrices[newId] = 0;
-          simQuantities[newId] = 0;
+          prices[newId] = 0;
+          quantities[newId] = 0;
 
           const newRow = document.createElement('tr');
           newRow.className = 'new-drink-row';
@@ -529,11 +630,11 @@
             <td>
               <div class="btns">
                 <button data-item="${newId}" data-delta="1">+</button>
-                <span id="sim_${newId}_qty">0</span>
+                <span id="${newId}_qty">0</span>
                 <button data-item="${newId}" data-delta="-1">-</button>
               </div>
             </td>
-            <td id="sim_${newId}_total">0円</td>
+            <td id="${newId}_total">0円</td>
           `;
           newSimDrinkRowsContainer.appendChild(newRow);
 
@@ -541,13 +642,12 @@
           const newPriceInput = document.getElementById(`${newId}_price`);
           newPriceInput.addEventListener('input', () => updateNewSimDrinkPrice(newId));
 
-          // 追加した行内の +/- ボタンにもイベントリスナーを設定
           const buttons = newRow.querySelectorAll('.btns button');
           buttons.forEach(button => {
             button.addEventListener('click', (event) => {
               const item = event.target.dataset.item;
               const delta = parseInt(event.target.dataset.delta);
-              adjustNewSimDrink(item, delta);
+              adjustSimNewDrink(item, delta);
             });
           });
         } else {
@@ -563,12 +663,12 @@
         const priceInput = document.getElementById(`${id}_price`);
         const price = parseInt(priceInput.value);
         if (!isNaN(price) && price >= 0) {
-          simPrices[id] = price;
+          prices[id] = price;
         } else {
-          simPrices[id] = 0; // 不正な入力の場合は0に設定
+          prices[id] = 0; // 不正な入力の場合は0に設定
           priceInput.value = ''; // 入力値をクリア
         }
-        calculateSimTotal(); // 価格が変更されたら合計を再計算
+        calculateSimulationTotal(); // 価格が変更されたら合計を再計算
       }
 
       /**
@@ -576,64 +676,97 @@
        * @param {string} id - カスタムドリンクID
        * @param {number} delta - 変更量 (+1 または -1)
        */
-      function adjustNewSimDrink(id, delta) {
+      function adjustSimNewDrink(id, delta) {
         const priceInput = document.getElementById(`${id}_price`);
         const price = parseInt(priceInput.value);
 
         if (isNaN(price) || price < 0) {
-          if (delta > 0) {
+          if (delta > 0) { // プラスしようとしたときに価格が不正
             alert('カスタムドリンクの金額を半角数字で入力してください。');
             priceInput.focus();
             return;
           }
         }
-        simPrices[id] = !isNaN(price) && price >= 0 ? price : (simPrices[id] || 0);
+        prices[id] = !isNaN(price) && price >= 0 ? price : (prices[id] || 0);
 
-        if (typeof simQuantities[id] === 'undefined') {
-          simQuantities[id] = 0;
+        if (typeof quantities[id] === 'undefined') {
+          quantities[id] = 0;
         }
-        simQuantities[id] = Math.max(0, simQuantities[id] + delta);
+        quantities[id] = Math.max(0, quantities[id] + delta);
 
-        updateSimItemDisplay(id);
-        calculateSimTotal();
+        updateItemDisplay(id);
+        calculateSimulationTotal();
       }
 
       /**
-       * シミュレーションの全てをリセットする
+       * シャンパンリストをHTMLテーブルに動的に生成する
+       */
+      function renderChampagneTable() {
+          champagneTableBody.innerHTML = ''; // 既存の行をクリア
+
+          champagnes.forEach(champagne => {
+              const row = champagneTableBody.insertRow();
+              row.insertCell().textContent = champagne.name;
+              row.insertCell().textContent = `${formatNumber(champagne.price)}円`;
+              const quantityCell = row.insertCell();
+              quantityCell.classList.add('btns'); // スタイルを合わせる
+              quantityCell.innerHTML = `
+                  <button data-item="${champagne.id}" data-type="champagne" data-delta="-1">-</button>
+                  <span id="champagne-qty-${champagne.id}">${champagneQuantities[champagne.id]}</span>
+                  <button data-item="${champagne.id}" data-type="champagne" data-delta="1">+</button>
+              `;
+              const totalCell = row.insertCell();
+              totalCell.id = `champagne-total-${champagne.id}`;
+              totalCell.textContent = `${formatNumber(champagne.price * champagneQuantities[champagne.id])}円`;
+          });
+          calculateSimulationTotal(); // テーブル生成後に合計を再計算
+      }
+
+
+      /**
+       * シミュレーション全てをリセットする
        */
       function resetSimulation() {
-        simHoursInput.value = 1;
-        simMinutesInput.value = 0;
+        // 滞在時間をリセット
+        simulatedTotalMinutes = 0;
 
-        Object.keys(simQuantities).forEach(key => {
-          if (simPrices.hasOwnProperty(key)) {
-            simQuantities[key] = 0;
-            updateSimItemDisplay(key);
-          }
+        // 通常ドリンクの数量をリセット
+        Object.keys(quantities).forEach(key => {
+            if (prices.hasOwnProperty(key)) {
+                quantities[key] = 0;
+                updateItemDisplay(key);
+            }
         });
 
-        newSimDrinkIds.forEach(id => {
-          delete simPrices[id];
-          delete simQuantities[id];
+        // シャンパンの数量をリセット
+        Object.keys(champagneQuantities).forEach(key => {
+            champagneQuantities[key] = 0;
+            updateChampagneDisplay(key);
         });
-        newSimDrinkIds = [];
-        newSimDrinkCount = 0;
-        newSimDrinkRowsContainer.innerHTML = '';
 
-        calculateSimTotal();
+        // カスタムドリンクのリセット
+        newDrinkIds.forEach(id => {
+          delete prices[id];
+          delete quantities[id];
+        });
+        newDrinkIds = [];
+        newDrinkCount = 0;
+        newSimDrinkRowsContainer.innerHTML = ''; // 追加されたドリンクの表示をクリア
+
+        calculateSimulationTotal(); // 全てリセット後、会計金額を再計算
       }
 
       /**
        * Service Workerの更新通知バーを表示する
        */
-      let serviceWorkerNewWorker;
+      let serviceWorkerNewWorker; // Service Workerの新しいインスタンスを保持
 
       function showUpdateBar() {
         if (updateNotification && updateButton) {
           updateNotification.style.display = 'block';
           updateButton.addEventListener('click', () => {
             if (serviceWorkerNewWorker) {
-              serviceWorkerNewWorker.postMessage({ action: 'skipWaiting' });
+              serviceWorkerNewWorker.postMessage({ action: 'skipWaiting' }); // Service Workerに更新を指示
             }
           });
         }
@@ -650,27 +783,49 @@
             }
         }, { passive: false });
 
-        // 時間入力の変更を検知
-        simHoursInput.addEventListener('input', calculateSimTotal);
-        simMinutesInput.addEventListener('input', calculateSimTotal);
+        // 滞在時間操作ボタン
+        add40MinButton.addEventListener('click', () => {
+            simulatedTotalMinutes += SET_DURATION_MINUTES;
+            calculateSimulationTotal();
+        });
+        subtract40MinButton.addEventListener('click', () => {
+            simulatedTotalMinutes = Math.max(0, simulatedTotalMinutes - SET_DURATION_MINUTES);
+            calculateSimulationTotal();
+        });
+        resetTimeButton.addEventListener('click', () => {
+            simulatedTotalMinutes = 0;
+            calculateSimulationTotal();
+        });
+
 
         // ドリンク数量調整ボタン (イベント委譲)
-        document.getElementById('simulationDrinkTable').addEventListener('click', (event) => {
+        document.querySelector('#simulationDrinkTable').addEventListener('click', (event) => {
           const button = event.target.closest('button[data-item]');
-          if (button) {
+          if (button && !button.dataset.type) { // typeが指定されていない（通常ドリンク）
             const item = button.dataset.item;
             const delta = parseInt(button.dataset.delta);
-            adjustSimQuantity(item, delta);
+            adjustQuantity(item, delta);
           }
         });
+
+        // シャンパン数量調整ボタン (イベント委譲)
+        document.querySelector('#simulationChampagneTable').addEventListener('click', (event) => {
+            const button = event.target.closest('button[data-item][data-type="champagne"]');
+            if (button) {
+                const item = button.dataset.item;
+                const delta = parseInt(button.dataset.delta);
+                adjustChampagneQuantity(item, delta);
+            }
+        });
+
 
         // カスタムドリンク追加ボタン
         document.getElementById('addNewSimDrinkRowButton').addEventListener('click', addNewSimDrinkRow);
 
-        // 全てリセットボタン
+        // シミュレーションリセットボタン
         document.getElementById('resetSimulationButton').addEventListener('click', resetSimulation);
 
-        // Service Workerの登録
+        // Service Workerの登録 (index.htmlと共通)
         if ('serviceWorker' in navigator) {
           window.addEventListener('load', () => {
             navigator.serviceWorker.register('./service-worker.js')
@@ -683,7 +838,7 @@
                   serviceWorkerNewWorker.addEventListener('statechange', () => {
                     if (serviceWorkerNewWorker.state === 'installed') {
                       if (navigator.serviceWorker.controller) {
-                        showUpdateBar();
+                        showUpdateBar(); // 更新ボタンを表示
                       }
                     }
                   });
@@ -693,6 +848,7 @@
                 console.log('ServiceWorker registration failed: ', err);
               });
 
+            // 新しいService Workerがアクティブ化されたらページをリロード
             navigator.serviceWorker.addEventListener('controllerchange', () => {
               window.location.reload();
             });
@@ -702,8 +858,9 @@
 
       // === 初期化処理 ===
       document.addEventListener('DOMContentLoaded', () => {
-        registerEventListeners();
-        calculateSimTotal(); // 初期表示の計算
+        registerEventListeners(); // イベントリスナーを登録
+        renderChampagneTable(); // シャンパンテーブルを生成
+        calculateSimulationTotal(); // 合計金額の計算と表示更新 (滞在時間も初期表示される)
       });
 
     })(); // 即時関数の終わり
