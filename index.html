@@ -388,6 +388,10 @@
     </tbody>
   </table>
 
+  <div id="updateNotification" style="display:none; text-align:center; padding:10px; background-color:#ffeb3b; color:#333; margin-top:20px; border-radius:8px;">
+    新しいバージョンがあります！ <button id="updateButton" style="background-color:#007bff; color:white; border:none; padding:8px 15px; border-radius:5px; margin-left:10px; cursor:pointer;">今すぐ更新</button>
+  </div>
+
 </div>
 
 <div class="fixed-buttons-container">
@@ -563,7 +567,6 @@
             quantities[id] = 0;
         }
         quantities[id] = Math.max(0, quantities[id] + delta);
-        const qtyElement = document.getElementById(`${id}_qty`);
         const totalElement = document.getElementById(`${id}_total`);
         if (totalElement) totalElement.innerText = `${formatNumber((prices[id] || 0) * quantities[id])}円`;
         calculate();
@@ -729,16 +732,54 @@
     calculate(); // 合計金額の計算と表示更新
   });
 
-  // Service Workerの登録（PWA化の最終ステップ）
+  // Service Workerの更新通知と処理
+  let newWorker;
+
+  function showUpdateBar() {
+    const updateNotification = document.getElementById('updateNotification');
+    const updateButton = document.getElementById('updateButton');
+
+    if (updateNotification && updateButton) {
+      updateNotification.style.display = 'block';
+      updateButton.addEventListener('click', () => {
+        if (newWorker) {
+          newWorker.postMessage({ action: 'skipWaiting' }); // Service Workerに更新を指示
+        }
+      });
+    }
+  }
+
+  // Service Workerの登録部分にイベントリスナーを追加
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./service-worker.js')
-        .then(registration => {
-          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        .then(reg => {
+          console.log('ServiceWorker registration successful with scope: ', reg.scope);
+
+          reg.addEventListener('updatefound', () => {
+            // 新しいService Workerが見つかったら
+            newWorker = reg.installing;
+
+            newWorker.addEventListener('statechange', () => {
+              // 新しいService Workerの状態が変化したら
+              if (newWorker.state === 'installed') {
+                // インストール済みだがまだアクティブでない場合
+                if (navigator.serviceWorker.controller) {
+                  // 現在のページがService Workerに制御されている場合
+                  showUpdateBar(); // 更新ボタンを表示
+                }
+              }
+            });
+          });
         })
         .catch(err => {
           console.log('ServiceWorker registration failed: ', err);
         });
+
+      // 新しいService Workerがアクティブ化されたらページをリロード
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
     });
   }
 </script>

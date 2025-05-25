@@ -1,7 +1,7 @@
 // キャッシュのバージョン名を定義します。
 // アプリを更新するたびにこのバージョン名を変更することで、
 // Service Workerが新しいキャッシュをダウンロードするようにトリガーします。
-const CACHE_NAME = 'my-accounting-app-v2.2'; // 新しいバージョンに変更しました
+const CACHE_NAME = 'my-accounting-app-v2.3'; // 新しいバージョンに変更しました
 
 // キャッシュするファイルの一覧を定義します。
 // ここに記載されたファイルは、初回アクセス時にキャッシュされます。
@@ -77,4 +77,11 @@ self.addEventListener('activate', (event) => {
       );
     }).then(() => self.clients.claim()) // 新しいService Workerが既存のタブも制御する
   );
+});
+
+// メッセージイベント: ページからService Workerにメッセージを送信したときに実行されます。
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });
