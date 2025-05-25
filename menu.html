@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>メニュー画面</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
+  <style>
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 15px;
+      background-color: #f9f9f9;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      padding-bottom: 20px; /* 下部に少しスペース */
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 30px;
+      color: #0056b3;
+    }
+
+    .container {
+      max-width: 500px;
+      width: 100%;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 30px;
+      text-align: center;
+      margin-bottom: 20px; /* 下部コンテンツとの間隔 */
+    }
+
+    .menu-item {
+      margin-bottom: 20px;
+    }
+
+    .menu-item a {
+      display: block;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      transition: background-color 0.2s ease;
+    }
+
+    .menu-item a:hover {
+      background-color: #0056b3;
+    }
+
+    /* メニューコンテンツのスタイル */
+    .menu-content {
+      max-width: 500px;
+      width: 100%;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .menu-category {
+      margin-bottom: 25px;
+    }
+
+    .menu-category h3 {
+      background-color: #e2e2e2;
+      color: #555;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    .menu-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .menu-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed #eee;
+      font-size: 1rem;
+    }
+
+    .menu-list li:last-child {
+      border-bottom: none;
+    }
+
+    .menu-item-name {
+      font-weight: bold;
+      color: #333;
+      flex-grow: 1; /* 名前が長い場合にも対応 */
+      text-align: left;
+    }
+
+    .menu-item-price {
+      font-weight: bold;
+      color: #d32f2f; /* 価格は赤系で強調 */
+      text-align: right;
+      white-space: nowrap; /* 価格の折り返し防止 */
+      margin-left: 10px; /* 名前との間隔 */
+    }
+
+    /* PWA更新通知バー (index.htmlと共通スタイル) */
+    #updateNotification {
+      display: none;
+      text-align: center;
+      padding: 10px;
+      background-color: #ffeb3b;
+      color: #333;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      width: 100%;
+      max-width: 500px;
+      box-sizing: border-box;
+    }
+
+    #updateNotification button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    /* レスポンシブ対応 */
+    @media (min-width: 600px) {
+      .container, .menu-content, #updateNotification {
+        padding: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="updateNotification">
+    新しいバージョンがあります！ <button id="updateButton">今すぐ更新</button>
+  </div>
+
+  <div class="container">
+    <h2>メニュー</h2>
+
+    <div class="menu-item">
+      <a href="index.html">会計・時間管理画面</a>
+    </div>
+
+    <div class="menu-item">
+      <a href="simulation.html">金額シミュレーション画面</a>
+    </div>
+  </div>
+
+  <div class="menu-content">
+    <div class="menu-category">
+      <h3>ドリンク</h3>
+      <ul class="menu-list">
+        <li><span class="menu-item-name">Lドリンク</span><span class="menu-item-price">¥1,700</span></li>
+        <li><span class="menu-item-name">メガドリンク</span><span class="menu-item-price">¥3,700</span></li>
+        <li><span class="menu-item-name">SHOT</span><span class="menu-item-price">¥1,500</span></li>
+        <li><span class="menu-item-name">ゲストSHOT</span><span class="menu-item-price">¥1,000</span></li>
+        <li><span class="menu-item-name">カラオケ5曲</span><span class="menu-item-price">¥1,000</span></li>
+      </ul>
+    </div>
+
+    <div class="menu-category">
+      <h3>シャンパン</h3>
+      <ul class="menu-list">
+        <li><span class="menu-item-name">LDC LDCシャンパン</span><span class="menu-item-price">¥20,000</span></li>
+        <li><span class="menu-item-name">LDC LDC光シャンパン</span><span class="menu-item-price">¥50,000</span></li>
+        <li><span class="menu-item-name">ヴーヴクリコ イエロー</span><span class="menu-item-price">¥26,000</span></li>
+        <li><span class="menu-item-name">ヴーヴクリコ ホワイト</span><span class="menu-item-price">¥28,000</span></li>
+        <li><span class="menu-item-name">ヴーヴクリコ リッチ</span><span class="menu-item-price">¥37,000</span></li>
+        <li><span class="menu-item-name">ヴーヴクリコ リッチゼロ</span><span class="menu-item-price">¥40,000</span></li>
+        <li><span class="menu-item-name">ランボルギーニ イエロー</span><span class="menu-item-price">¥25,000</span></li>
+        <li><span class="menu-item-name">ランボルギーニ オレンジ</span><span class="menu-item-price">¥45,000</span></li>
+        <li><span class="menu-item-name">ランボルギーニ プラチナ</span><span class="menu-item-price">¥65,000</span></li>
+        <li><span class="menu-item-name">ランボルギーニ ルミナス</span><span class="menu-item-price">¥120,000</span></li>
+        <li><span class="menu-item-name">モエシャンドン アイス</span><span class="menu-item-price">¥30,000</span></li>
+        <li><span class="menu-item-name">モエシャンドン アイスロゼ</span><span class="menu-item-price">¥35,000</span></li>
+        <li><span class="menu-item-name">アルマンド ゴールド</span><span class="menu-item-price">¥150,000</span></li>
+        <li><span class="menu-item-name">ソウメイ 白</span><span class="menu-item-price">¥65,000</span></li>
+        <li><span class="menu-item-name">エンジェル ブラック</span><span class="menu-item-price">¥120,000</span></li>
+        <li><span class="menu-item-name">エンジェル ホワイト</span><span class="menu-item-price">¥200,000</span></li>
+        <li><span class="menu-item-name">ペリエジュエベルエポック 白</span><span class="menu-item-price">¥80,000</span></li>
+        <li><span class="menu-item-name">ディーバ ピーチ／ベリー</span><span class="menu-item-price">¥10,000</span></li>
+        <li><span class="menu-item-name">ノンアルコール 1688</span><span class="menu-item-price">¥20,000</span></li>
+        <li><span class="menu-item-name">ノンアルコール シャンメイ</span><span class="menu-item-price">¥10,000</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // Service Workerの更新通知と処理 (index.htmlと共通)
+    let serviceWorkerNewWorker; // Service Workerの新しいインスタンスを保持
+
+    function showUpdateBar() {
+      const updateNotification = document.getElementById('updateNotification');
+      const updateButton = document.getElementById('updateButton');
+
+      if (updateNotification && updateButton) {
+        updateNotification.style.display = 'block';
+        updateButton.addEventListener('click', () => {
+          if (serviceWorkerNewWorker) {
+            serviceWorkerNewWorker.postMessage({ action: 'skipWaiting' }); // Service Workerに更新を指示
+          }
+        });
+      }
+    }
+
+    // Service Workerの登録部分にイベントリスナーを追加 (index.htmlと共通)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => {
+            console.log('ServiceWorker registration successful with scope: ', reg.scope);
+
+            reg.addEventListener('updatefound', () => {
+              serviceWorkerNewWorker = reg.installing; // 新しいService Workerを保存
+
+              serviceWorkerNewWorker.addEventListener('statechange', () => {
+                if (serviceWorkerNewWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller) {
+                    showUpdateBar(); // 更新ボタンを表示
+                  }
+                }
+              });
+            });
+          })
+          .catch(err => {
+            console.log('ServiceWorker registration failed: ', err);
+          });
+
+        // 新しいService Workerがアクティブ化されたらページをリロード
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          window.location.reload();
+        });
+      });
+    }
+  </script>
+</body>
+</html>
