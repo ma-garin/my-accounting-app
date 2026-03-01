@@ -1,7 +1,7 @@
 // キャッシュのバージョン名を定義します。
 // アプリを更新するたびにこのバージョン名を変更することで、
 // Service Workerが新しいキャッシュをダウンロードするようにトリガーします。
-const CACHE_NAME = 'my-accounting-app-v2.10'; // バージョンを v2.10 に更新しました
+const CACHE_NAME = 'my-accounting-app-v2.11'; // バージョンを v2.11 に更新しました
 
 // キャッシュするファイルの一覧を定義します。
 // ここに記載されたファイルは、初回アクセス時にキャッシュされます。
@@ -34,30 +34,51 @@ self.addEventListener('install', (event) => {
 // フェッチイベント: アプリがネットワークリクエストを行うたびに実行されます。
 // ここで、キャッシュ優先の戦略を実装します。
 self.addEventListener('fetch', (event) => {
+  const { request } = event;
+
+  // GET 以外は Service Worker で扱わない
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  // HTML ドキュメントはネットワーク優先にして、古い画面が残るのを防ぐ
+  const isNavigationRequest = request.mode === 'navigate' || request.destination === 'document';
+  if (isNavigationRequest) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(request).then((cachedResponse) => cachedResponse || caches.match('index.html'));
+        })
+    );
+    return;
+  }
+
+  // 画像や JS/CSS はキャッシュ優先
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // キャッシュにリソースがあれば、それを返す
-        if (response) {
+    caches.match(request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(request).then((response) => {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
         }
-        // なければネットワークから取得し、キャッシュに追加してから返す
-        return fetch(event.request).then(
-          (response) => {
-            // レスポンスが不正な場合（例えば、HTTP 200でない、またはBasicタイプでない）はキャッシュしない
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-            // レスポンスをクローンしてキャッシュに保存
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-            return response;
-          }
-        );
-      })
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(request, responseToCache);
+        });
+        return response;
+      });
+    })
   );
 });
 
