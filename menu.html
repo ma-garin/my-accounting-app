@@ -232,9 +232,10 @@
     // Service Workerの登録部分にイベントリスナーを追加 (index.htmlと共通)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
+        navigator.serviceWorker.register('./service-worker.js?v=2.12', { updateViaCache: 'none' })
           .then(reg => {
             console.log('ServiceWorker registration successful with scope: ', reg.scope);
+            reg.update();
 
             reg.addEventListener('updatefound', () => {
               serviceWorkerNewWorker = reg.installing; // 新しいService Workerを保存
