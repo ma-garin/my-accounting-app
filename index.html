@@ -3,1107 +3,875 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>マイ会計・時間管理</title>
+  <title>会計・時間管理</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e8c96a;
+      --gold-dim: rgba(201,168,76,0.15);
+      --dark: #0d0d0f;
+      --dark-card: #16161a;
+      --dark-border: rgba(201,168,76,0.25);
+      --text-main: #f0ead6;
+      --text-muted: #8a8070;
+      --accent-red: #c0392b;
+      --accent-green: #27ae60;
+      --accent-orange: #e67e22;
+      --font-display: 'Cormorant Garamond', serif;
+      --font-body: 'Noto Sans JP', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Helvetica Neue', sans-serif;
-      margin: 0;
-      padding: 15px;
-      background-color: #f9f9f9;
-      color: #333;
-      padding-bottom: 70px; /* 下部ボタンのためのスペース */
+      font-family: var(--font-body);
+      background-color: var(--dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 12px 12px 80px;
+      overflow-x: hidden;
       position: relative;
-      line-height: 1.5;
-
-      /* === 背景画像の設定 === */
-      background-image: url('https://pbs.twimg.com/profile_images/1244998649316143105/UC0d5YrU_400x400.jpg');
-      background-size: cover;
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
     }
-    h2, h3, h4 {
-      text-align: center;
-      margin-top: 20px;
-      margin-bottom: 15px;
-      color: #0056b3;
-    }
-    .container {
-      max-width: 500px;
-      margin: auto;
-      background: rgba(255, 255, 255, 0.9); /* 白の半透明背景でコンテンツを読みやすく */
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      padding: 15px;
-    }
-
-    /* 各セクションの余白調整 */
-    .time-tracker, .summary-table {
-      margin-bottom: 25px;
-    }
-
-    /* === 時間管理セクション === */
-    .time-tracker div {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
-    }
-    .time-tracker div:last-child {
-      border-bottom: none;
-    }
-    .time-tracker label {
-      font-weight: bold;
-      color: #555;
-    }
-    .time-tracker span, .time-tracker button {
-      font-size: 1.1rem;
-      color: #333;
-    }
-    .time-buttons {
-      display: flex;
-      flex-wrap: wrap; /* ボタンが多ければ折り返す */
-      justify-content: center; /* 中央寄せ */
-      gap: 10px; /* ボタン間のスペース */
-      margin-top: 20px;
-    }
-    .time-buttons button {
-      flex: 1 1 calc(50% - 5px); /* 2列表示で均等に、flex-growとflex-shrinkを有効に */
-      /* max-width: 150px; /* これを削除 */
-      padding: 10px 10px; /* ボタンのパディング */
-      font-size: 0.95rem; /* フォントサイズ */
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-      white-space: nowrap;
-    }
-    .time-buttons button:hover { background-color: #0056b3; }
-    .time-buttons button:active { background-color: #004085; }
-
-    /* === ドリンクリストコンテナ (主要ドリンク用) === */
-    #drinkListContainer {
-      display: grid; /* CSS Grid を使用 */
-      gap: 12px; /* カード間のスペース */
-      margin-bottom: 25px;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* 2列表示 (スマホでは1列に自動調整) */
-    }
-
-    /* === ドリンクカードのスタイル (主要ドリンク用) === */
-    .drink-card {
-      background-color: rgba(240, 248, 255, 0.95); /* カードの背景色を半透明に */
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 12px 10px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      display: grid; /* カード内部のレイアウトもグリッド */
-      grid-template-columns: 1fr auto; /* 項目名・価格が左、数量・合計が右 */
-      grid-template-rows: auto auto; /* 項目名・数量が上、価格・合計が下 */
-      align-items: center;
-      gap: 5px 10px; /* 行間と列間のギャップを調整 */
-    }
-    .drink-item-name {
-      font-weight: bold;
-      font-size: 1rem; /* 少し小さく */
-      color: #0056b3;
-      grid-column: 1 / 2;
-      grid-row: 1 / 2;
-      text-align: left;
-      white-space: nowrap; /* 折り返しなし */
-      overflow: hidden;
-      text-overflow: ellipsis; /* 省略記号 */
-      min-width: 0;
-    }
-    .drink-item-price {
-      font-size: 0.85rem; /* 少し小さく */
-      color: #555;
-      grid-column: 1 / 2;
-      grid-row: 2 / 3;
-      text-align: left;
-    }
-    .drink-quantity-control {
-      grid-column: 2 / 3;
-      grid-row: 1 / 2;
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 2px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .drink-quantity-control button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-      transition: background-color 0.2s;
-      flex-shrink: 0;
-    }
-    .drink-quantity-control button:hover { background-color: #0056b3; }
-    .drink-quantity-control button:active { background-color: #004085; }
-    .drink-current-quantity {
-      font-size: 1rem;
-      font-weight: bold;
-      color: #333;
-      min-width: 25px;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .drink-item-total {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #d9534f;
-      grid-column: 2 / 3;
-      grid-row: 2 / 3;
-      text-align: right;
-    }
-
-    /* === アコーディオン部分 === */
-    .accordion-header {
-      background-color: rgba(224, 224, 224, 0.9); /* ヘッダーの背景色を半透明に */
-      color: #333;
-      padding: 10px 15px;
-      margin-top: 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: bold;
-      transition: background-color 0.2s;
-    }
-    .accordion-header:hover { background-color: #d0d0d0; }
-    .accordion-header::after {
-      content: '▼';
-      font-size: 0.8em;
-      transition: transform 0.2s;
-    }
-    .accordion-header.active::after {
-      content: '▲';
-      transform: rotate(0deg);
-    }
-    .accordion-content {
-      background-color: rgba(255, 255, 255, 0.95); /* コンテンツの背景色を半透明に */
-      border: 1px solid #e0e0e0;
-      border-top: none;
-      border-radius: 0 0 8px 8px;
-      padding: 10px;
-      display: none;
-      overflow: hidden;
-    }
-    .accordion-content.open {
-      display: block; /* ブロック要素で表示 */
-      padding-top: 5px; /* 上部パディングを調整 */
-    }
-
-    /* === アコーディオン内のリスト形式 === */
-    .accordion-item {
-      display: flex; /* Flexboxで横並び */
-      align-items: center;
-      justify-content: space-between; /* 両端寄せ */
-      padding: 8px 5px; /* 上下パディング */
-      border-bottom: 1px solid #eee; /* アイテム間の区切り線 */
-    }
-    .accordion-item:last-child {
-      border-bottom: none; /* 最後の子には線なし */
-    }
-    .accordion-item-info {
-      display: flex;
-      flex-direction: column; /* 項目名と価格を縦に */
-      text-align: left;
-      flex-grow: 1; /* スペースを占有 */
-      padding-right: 10px; /* 右側に少し余白 */
-    }
-    .accordion-item-name {
-      font-weight: bold;
-      font-size: 0.95rem;
-      color: #333;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .accordion-item-price {
-      font-size: 0.8rem;
-      color: #666;
-    }
-    /* === アコーディオン内の数量コントロール（スピンボタン） === */
-    .accordion-item-control {
-      display: flex;
-      align-items: center;
-      gap: 3px; /* ボタンと数字の間隔を調整 */
-      flex-shrink: 0; /* 縮まない */
-    }
-    .accordion-item-control .plus-button,
-    .accordion-item-control .minus-button {
-        background-color: #007bff; /* 青色 */
-        color: white;
-        border: none;
-        border-radius: 4px; /* 四角いボタン */
-        width: 28px; /* ボタンのサイズ */
-        height: 28px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 1.1rem; /* +/- のサイズ */
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-        transition: background-color 0.2s;
-        flex-shrink: 0;
-    }
-    .accordion-item-control .plus-button:hover,
-    .accordion-item-control .minus-button:hover { background-color: #0056b3; }
-    .accordion-item-quantity {
-      font-size: 1rem;
-      font-weight: bold;
-      min-width: 25px; /* 数字表示の最小幅 */
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .accordion-item-total {
-      font-size: 1rem;
-      font-weight: bold;
-      color: #d9534f;
-      min-width: 50px; /* 合計金額の最小幅 */
-      text-align: right;
-      margin-left: 10px; /* 数量と合計の間隔 */
-    }
-
-    /* === カスタムドリンク入力フィールドのスタイル === */
-    .custom-drink-item .custom-drink-name-input {
-        width: 100%; /* 親要素の幅いっぱいに */
-        padding: 5px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box; /* パディングとボーダーを幅に含める */
-        margin-bottom: 5px; /* 下に少し余白 */
-    }
-    .custom-drink-item .custom-drink-price-input {
-        width: 80px; /* 金額入力の幅を固定 */
-        padding: 5px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        text-align: right;
-        box-sizing: border-box;
-    }
-    .custom-drink-item .accordion-item-info {
-        flex-direction: column; /* 名前と金額を縦に並べる */
-        align-items: flex-start; /* 左寄せ */
-    }
-
-
-    /* === 会計サマリーテーブル === */
-    .summary-table {
-        width: 100%; /* テーブルの幅を親要素に合わせる */
-        border-collapse: collapse;
-        margin-bottom: 15px;
-    }
-    .summary-table td:nth-child(1) {
-      text-align: left; /* 1列目は左揃え */
-      font-weight: bold;
-      color: #555;
-      padding: 8px; /* パディングを追加 */
-      border: 1px solid #ddd; /* ボーダーを追加 */
-    }
-    .summary-table td:nth-child(2) {
-      text-align: right; /* 2列目は右揃え */
-      font-weight: bold;
-      color: #333;
-      padding: 8px; /* パディングを追加 */
-      border: 1px solid #ddd; /* ボーダーを追加 */
-    }
-    /* テーブルのヘッダーがないため、tdに直接ボーダーとパディングを設定 */
-
-
-    /* 現在の総計を強調 */
-    #current_grand_total {
-      text-align: center;
-      font-size: 2.2rem; /* 大きく強調 */
-      color: #d32f2f; /* 赤色系で目立たせる */
-      padding: 15px 0;
-      background-color: #ffe0b2; /* 背景色を追加 */
-      border-radius: 8px;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    /* 残り時間アラート */
-    #remaining.alert {
-      color: red;
-      font-weight: bold;
-    }
-
-    /* PWA更新通知バー */
-    #updateNotification {
-      display: none;
-      text-align: center;
-      padding: 10px;
-      background-color: #ffeb3b;
-      color: #333;
-      margin-top: 20px;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-    #updateNotification button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 5px;
-      margin-left: 10px;
-      cursor: pointer;
-    }
-
-    /* === 下部固定ボタンのスタイル === */
-    .fixed-bottom-bar {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
+    body::before {
+      content: '';
       position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: rgba(0, 86, 179, 0.95); /* 不透明度を高くして見やすく */
-      padding: 10px 8px;
-      box-shadow: 0 -2px 8px rgba(0,0,0,0.15);
-      z-index: 1000;
-      gap: 5px;
-      max-width: 500px; /* 中央揃えのために設定 */
-      left: 50%;
-      transform: translateX(-50%);
+      top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(ellipse at 30% 20%, rgba(201,168,76,0.06) 0%, transparent 50%),
+                  radial-gradient(ellipse at 70% 80%, rgba(201,168,76,0.04) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
     }
-    .fixed-bottom-bar button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 8px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-      flex-grow: 1;
-      flex-basis: 0;
-      white-space: nowrap;
+    .container { max-width: 500px; margin: auto; position: relative; z-index: 1; }
+
+    /* ヘッダー */
+    header { text-align: center; padding: 20px 0 16px; border-bottom: 1px solid var(--dark-border); margin-bottom: 16px; }
+    header h1 { font-family: var(--font-display); font-size: 1.8rem; font-weight: 600; color: var(--gold); letter-spacing: 0.12em; }
+    header .subtitle { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.3em; text-transform: uppercase; margin-top: 4px; }
+
+    /* カード */
+    .card { background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+    .card-title {
+      font-family: var(--font-display); font-size: 1.1rem; color: var(--gold);
+      letter-spacing: 0.1em; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
     }
-    .fixed-bottom-bar button:hover { background-color: #0056b3; }
-    .fixed-bottom-bar button:active { background-color: #004085; }
+    .card-title::after { content: ''; flex: 1; height: 1px; background: var(--dark-border); }
 
-    /* === レスポンシブデザイン === */
-    /* 画面幅が400px以下の場合、1列表示に自動調整 */
-    @media (max-width: 399px) {
-        #drinkListContainer {
-            grid-template-columns: 1fr; /* 1列 */
-        }
-        .drink-card {
-            padding: 10px; /* パディングをさらに小さく */
-            gap: 5px 8px;
-        }
-        .drink-item-name { font-size: 0.95rem; }
-        .drink-item-price { font-size: 0.8rem; }
-        .drink-current-quantity { font-size: 0.95rem; min-width: 20px;}
-        .drink-quantity-control button {
-            width: 24px;
-            height: 24px;
-            font-size: 1.1rem;
-        }
-        .drink-item-total { font-size: 1.05rem; }
-
-        /* アコーディオン内のリストも調整 */
-        .accordion-item-info { flex-grow: 1; }
-        .accordion-item-control { gap: 3px; }
-        .accordion-item-control .plus-button,
-        .accordion-item-control .minus-button { width: 24px; height: 24px; font-size: 1rem; }
-        .accordion-item-quantity { font-size: 0.9rem; min-width: 20px; }
-        .accordion-item-total { font-size: 0.95rem; min-width: 45px; }
+    /* 合計金額 */
+    #current-total-card {
+      background: linear-gradient(135deg, #1a1508 0%, #0d0d0f 100%);
+      border-color: var(--gold); text-align: center; padding: 20px 16px 16px;
     }
+    #current-total-label { font-size: 0.65rem; letter-spacing: 0.3em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+    #current_grand_total { font-family: var(--font-display); font-size: 3rem; font-weight: 700; color: var(--gold-light); line-height: 1; text-shadow: 0 0 30px rgba(201,168,76,0.4); }
+    #current_grand_total span { font-size: 1.2rem; margin-left: 4px; opacity: 0.8; }
 
-    /* レスポンシブ対応 (デスクトップなど広い画面用) */
-    @media (min-width: 600px) {
-      .container {
-        padding: 25px;
-      }
-      .fixed-bottom-bar {
-        width: 500px; /* .container と同じ幅 */
-      }
+    /* 予算バー */
+    #budget-bar-wrap { margin-top: 14px; display: none; }
+    #budget-bar-wrap.visible { display: block; }
+    .budget-label-row { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px; }
+    .budget-bar-bg { background: rgba(255,255,255,0.08); border-radius: 99px; height: 8px; overflow: hidden; }
+    #budget-bar { height: 100%; border-radius: 99px; background: var(--accent-green); transition: width 0.4s, background 0.4s; width: 0%; }
+    #budget-bar.warn { background: var(--accent-orange); }
+    #budget-bar.danger { background: var(--accent-red); }
+    #budget-alert { margin-top: 8px; font-size: 0.78rem; font-weight: 700; text-align: center; color: var(--accent-red); display: none; }
+    #budget-alert.show { display: block; animation: pulse 1s infinite; }
+
+    /* あと何杯 */
+    #drink-calc-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.06); display: none; }
+    #drink-calc-section.visible { display: block; }
+    .drink-calc-title { font-size: 0.63rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    .drink-calc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .drink-calc-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 10px; text-align: center; }
+    .drink-calc-item .dc-name { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; }
+    .drink-calc-item .dc-count { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; color: var(--gold); line-height: 1; }
+    .drink-calc-item .dc-count.ng { color: var(--accent-red); font-size: 1.1rem; }
+    .drink-calc-item .dc-unit { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* 予算設定 */
+    .budget-input-row { display: flex; align-items: center; gap: 8px; }
+    .budget-input-row input {
+      flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px; padding: 10px 12px; color: var(--text-main);
+      font-family: var(--font-body); font-size: 1rem; outline: none; text-align: right;
+    }
+    .budget-input-row input:focus { border-color: var(--gold); }
+    .budget-input-row .unit { color: var(--text-muted); font-size: 0.85rem; white-space: nowrap; }
+    .budget-set-btn { background: var(--gold); color: var(--dark); border: none; border-radius: 8px; padding: 10px 18px; font-weight: 700; font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: background 0.2s; }
+    .budget-set-btn:hover { background: var(--gold-light); }
+    .budget-clear-btn { background: none; border: none; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; text-decoration: underline; margin-top: 6px; }
+
+    /* 時間管理 */
+    .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .time-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px 12px; }
+    .time-item.wide { grid-column: 1 / -1; }
+    .time-item label { font-size: 0.63rem; color: var(--text-muted); letter-spacing: 0.18em; text-transform: uppercase; display: block; margin-bottom: 4px; }
+    .time-item .value { font-family: var(--font-display); font-size: 1.3rem; color: var(--text-main); }
+    .time-item .value.alert { color: var(--accent-red); animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
+    .set-badge { display: inline-block; background: var(--gold-dim); border: 1px solid var(--gold); color: var(--gold); border-radius: 20px; padding: 2px 14px; font-size: 1.1rem; font-weight: 700; font-family: var(--font-display); }
+
+    /* 退店逆算 */
+    #checkout-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .checkout-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .checkout-input-row label { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; }
+    .checkout-time-input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 8px 10px; color: var(--text-main); font-family: var(--font-display); font-size: 1.1rem; outline: none; text-align: center; }
+    .checkout-time-input:focus { border-color: var(--gold); }
+    #checkout-result { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 12px; display: none; }
+    #checkout-result.visible { display: block; }
+    .checkout-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.83rem; }
+    .checkout-row:last-child { border-bottom: none; }
+    .checkout-row .cr-label { color: var(--text-muted); }
+    .checkout-row .cr-val { font-weight: 700; font-family: var(--font-display); font-size: 1rem; }
+    .checkout-row .cr-val.warn { color: var(--accent-orange); }
+    .checkout-row .cr-val.safe { color: var(--accent-green); }
+    .checkout-row .cr-val.danger { color: var(--accent-red); }
+
+    /* ボタン */
+    .time-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn { padding: 11px 8px; border: 1px solid var(--dark-border); border-radius: 8px; font-family: var(--font-body); font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s; letter-spacing: 0.04em; }
+    .btn-primary { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+    .btn-primary:hover { background: var(--gold-light); }
+    .btn-ghost { background: transparent; color: var(--text-main); }
+    .btn-ghost:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+    .btn-danger { background: transparent; color: var(--accent-red); border-color: rgba(192,57,43,0.4); }
+    .btn-danger:hover { background: rgba(192,57,43,0.1); }
+
+    /* ドリンクカード */
+    #drinkListContainer { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .drink-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 9px; padding: 12px 10px; transition: border-color 0.2s; }
+    .drink-card.has-items { border-color: var(--gold); background: var(--gold-dim); }
+    .drink-item-name { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+    .drink-item-price { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 8px; }
+    .drink-qty-row { display: flex; align-items: center; justify-content: space-between; }
+    .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--dark-border); background: transparent; color: var(--gold); font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0; }
+    .qty-btn:hover { background: var(--gold-dim); border-color: var(--gold); }
+    .drink-current-quantity { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; min-width: 28px; text-align: center; }
+    .drink-item-total { font-size: 0.82rem; color: var(--gold); font-weight: 700; text-align: right; }
+
+    /* アコーディオン */
+    .accordion-header { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; font-weight: 700; color: var(--text-muted); transition: all 0.2s; margin-bottom: 0; }
+    .accordion-header:hover { color: var(--text-main); border-color: var(--dark-border); }
+    .accordion-header .arrow { transition: transform 0.2s; font-size: 0.7rem; }
+    .accordion-header.active { border-radius: 8px 8px 0 0; color: var(--gold); border-color: var(--dark-border); }
+    .accordion-header.active .arrow { transform: rotate(180deg); }
+    .accordion-content { display: none; background: var(--dark-card); border: 1px solid var(--dark-border); border-top: none; border-radius: 0 0 8px 8px; padding: 12px; margin-bottom: 14px; }
+    .accordion-content.open { display: block; }
+    .accordion-item { display: flex; align-items: center; padding: 9px 4px; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 8px; }
+    .accordion-item:last-child { border-bottom: none; }
+    .accordion-item-info { flex: 1; min-width: 0; }
+    .accordion-item-name { font-size: 0.87rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .accordion-item-price { font-size: 0.72rem; color: var(--text-muted); }
+    .accordion-item-control { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .accordion-item-quantity { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; min-width: 22px; text-align: center; }
+    .accordion-item-total { font-size: 0.82rem; font-weight: 700; color: var(--gold); min-width: 52px; text-align: right; flex-shrink: 0; }
+    .plus-button, .minus-button { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--dark-border); background: transparent; color: var(--gold); font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .plus-button:hover, .minus-button:hover { background: var(--gold-dim); border-color: var(--gold); }
+    .custom-drink-item .accordion-item-info { flex-direction: column; }
+    .custom-drink-name-input, .custom-drink-price-input { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 5px; padding: 5px 8px; color: var(--text-main); font-family: var(--font-body); font-size: 0.82rem; outline: none; width: 100%; margin-bottom: 4px; }
+    .custom-drink-price-input { width: 80px; text-align: right; margin-bottom: 0; }
+    .custom-drink-name-input:focus, .custom-drink-price-input:focus { border-color: var(--gold); }
+    .custom-input-row { display: flex; align-items: center; gap: 4px; }
+    .custom-input-row span { font-size: 0.75rem; color: var(--text-muted); }
+    .add-custom-btn { width: 100%; padding: 10px; margin-top: 10px; background: transparent; border: 1px dashed rgba(201,168,76,0.4); border-radius: 7px; color: var(--gold); font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+    .add-custom-btn:hover { background: var(--gold-dim); border-style: solid; }
+
+    /* 会計サマリー */
+    .summary-table { width: 100%; border-collapse: collapse; }
+    .summary-table tr { border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .summary-table tr:last-child { border-bottom: none; }
+    .summary-table td { padding: 8px 4px; font-size: 0.87rem; }
+    .summary-table td:first-child { color: var(--text-muted); }
+    .summary-table td:last-child { text-align: right; font-weight: 700; }
+    .summary-table .total-row td { padding-top: 12px; font-size: 1rem; color: var(--gold); }
+
+    /* 訪問比較 */
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .compare-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 10px 8px; text-align: center; }
+    .compare-item .ci-label { font-size: 0.65rem; color: var(--text-muted); margin-bottom: 4px; letter-spacing: 0.1em; }
+    .compare-item .ci-val { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; }
+    .compare-item .ci-val.up { color: var(--accent-red); }
+    .compare-item .ci-val.down { color: var(--accent-green); }
+    .compare-item .ci-sub { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* 履歴 */
+    #history-list { max-height: 280px; overflow-y: auto; }
+    #history-list::-webkit-scrollbar { width: 4px; }
+    #history-list::-webkit-scrollbar-thumb { background: var(--dark-border); border-radius: 2px; }
+    .history-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 12px; margin-bottom: 8px; transition: border-color 0.2s; }
+    .history-item:hover { border-color: var(--dark-border); }
+    .history-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .history-item-date { font-size: 0.72rem; color: var(--text-muted); }
+    .history-item-total { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+    .history-item-detail { font-size: 0.72rem; color: var(--text-muted); }
+    .history-empty { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 20px; }
+    .history-clear-btn { font-size: 0.75rem; color: var(--accent-red); background: none; border: none; cursor: pointer; text-decoration: underline; }
+
+    /* 下部バー */
+    .fixed-bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 500px; background: rgba(13,13,15,0.95); backdrop-filter: blur(12px); border-top: 1px solid var(--dark-border); padding: 10px 12px; display: flex; gap: 8px; z-index: 1000; }
+    .fixed-bottom-bar .btn { flex: 1; font-size: 0.8rem; padding: 10px 4px; }
+    .btn-save { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%); color: var(--dark); border-color: var(--gold); font-weight: 700; }
+    .btn-save:hover { opacity: 0.9; }
+
+    /* PWA更新 */
+    #updateNotification { display: none; background: rgba(201,168,76,0.15); border: 1px solid var(--gold); border-radius: 8px; padding: 10px 14px; text-align: center; font-size: 0.82rem; color: var(--gold); margin-bottom: 14px; }
+    #updateButton { background: var(--gold); color: var(--dark); border: none; padding: 5px 12px; border-radius: 5px; margin-left: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 700; }
+
+    @media (max-width: 380px) {
+      #drinkListContainer { grid-template-columns: 1fr; }
+      .compare-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h2>マイ会計・時間管理</h2>
-    </header>
+<div class="container">
 
-    <div id="updateNotification">
-      新しいバージョンがあります！ <button id="updateButton">今すぐ更新</button>
+  <header>
+    <h1>会計・時間管理</h1>
+    <div class="subtitle">Accounting &amp; Time Management</div>
+  </header>
+
+  <div id="updateNotification">
+    新バージョンがあります <button id="updateButton">今すぐ更新</button>
+  </div>
+
+  <!-- 現在合計 + 予算バー + あと何杯 -->
+  <div class="card" id="current-total-card">
+    <div id="current-total-label">現在の合計金額</div>
+    <div id="current_grand_total">0<span>円</span></div>
+    <div id="budget-bar-wrap">
+      <div class="budget-label-row">
+        <span>予算 <span id="budget-label-amount"></span></span>
+        <span id="budget-remaining-text"></span>
+      </div>
+      <div class="budget-bar-bg"><div id="budget-bar"></div></div>
+      <div id="budget-alert">⚠️ 予算を超過しています！</div>
     </div>
-
-    <main>
-      <section id="currentTotalSection">
-        <h3>現在の合計金額</h3>
-        <p id="current_grand_total"><strong>0円</strong></p>
-      </section>
-
-      <section id="timeManagement">
-        <h3>時間管理</h3>
-        <div class="time-tracker">
-          <div>
-            <label>現在時刻:</label>
-            <span id="now"></span>
-          </div>
-          <div>
-            <label>開始時刻:</label>
-            <span id="start"></span>
-          </div>
-          <div>
-            <label>経過時間:</label>
-            <span id="elapsed_time"></span>
-          </div>
-          <div>
-            <label>現在のセット数:</label>
-            <span id="total_sets">0</span>
-          </div>
-          <div>
-            <label>現セット残り時間:</label>
-            <span id="remaining"></span>
-          </div>
-        </div>
-        <div class="time-buttons">
-          <button id="startButton">開始</button>
-          <button id="pauseButton">一時停止</button>
-          <button id="endButton">終了</button>
-          <button id="resetTimerButton">タイマーリセット</button>
-        </div>
-      </section>
-
-      <section id="drinkAccount">
-        <h3>主要ドリンク</h3>
-        <div id="drinkListContainer">
-          </div>
-      </section>
-
-      <section id="otherDrinksSection">
-        <div class="accordion-header" id="otherDrinksAccordionHeader">
-          その他のドリンク
-        </div>
-        <div class="accordion-content" id="otherDrinksAccordionContent">
-          <h4 style="text-align: left; margin-top: 15px; margin-bottom: 10px; color: #0056b3;">カスタムドリンク</h4>
-          <div id="newDrinkRowsContainer">
-            </div>
-          <div style="text-align: center; margin-top: 15px;">
-            <button id="addNewDrinkRowButton" style="background-color: #28a745;">カスタムドリンク追加</button>
-          </div>
-        </div>
-      </section>
-
-      <section id="summaryAccount">
-        <h3>会計サマリー</h3>
-        <table class="summary-table">
-          <tr>
-            <td>セット合計</td>
-            <td id="set_sum">0円</td>
-          </tr>
-          <tr>
-            <td>ドリンク合計</td>
-            <td id="drink_sum">0円</td>
-          </tr>
-          <tr>
-            <td>小計</td>
-            <td id="subtotal_summary">0円</td>
-          </tr>
-          <tr>
-            <td>サービス料(10%)</td>
-            <td id="service">0円</td>
-          </tr>
-          <tr>
-            <td>消費税(10%)</td>
-            <td id="tax">0円</td>
-          </tr>
-          <tr>
-            <td>合計金額</td>
-            <td id="grand_total_summary"><strong>0円</strong></td>
-          </tr>
-        </table>
-      </section>
-    </main>
+    <div id="drink-calc-section">
+      <div class="drink-calc-title">残予算でオーダー可能数</div>
+      <div class="drink-calc-grid" id="drink-calc-grid"></div>
+    </div>
   </div>
 
-  <div class="fixed-bottom-bar">
-    <button id="resetAllButton">リセット</button>
-    <button onclick="window.location.href='simulation.html'">シミュレーション</button>
-    <button onclick="window.location.href='menu.html'">メニュー</button>
+  <!-- 予算設定 -->
+  <div class="card">
+    <div class="card-title">予算設定</div>
+    <div class="budget-input-row">
+      <input type="number" id="budget-input" placeholder="例：30000" min="0" step="1000">
+      <span class="unit">円</span>
+      <button class="budget-set-btn" id="budget-set-btn">設定</button>
+    </div>
+    <div style="text-align:right;margin-top:6px;">
+      <button class="budget-clear-btn" id="budget-clear-btn">予算をクリア</button>
+    </div>
   </div>
 
-  <script>
-    // 即時関数でスコープを隔離
-    (function() {
-      // === 定数定義 ===
-      const SET_DURATION_MINUTES = 40;
-      const MS_PER_SECOND = 1000;
-      const MS_PER_MINUTE = 60 * MS_PER_SECOND;
-      const MS_PER_HOUR = 60 * MS_PER_MINUTE;
-      const SET_DURATION_MS = SET_DURATION_MINUTES * MS_PER_MINUTE;
-
-      const MAX_NEW_DRINKS = 5; // 追加できるカスタムドリンクの最大数
-      const SERVICE_CHARGE_RATE = 0.10; // サービス料率
-      const TAX_RATE = 0.10; // 消費税率
-
-      // ドリンクデータ（元のpricesとquantitiesを統合し、typeを追加）
-      const drinks = [
-        { id: 'ldrink', name: 'Lドリンク', price: 1700, type: 'main' },
-        { id: 'megadrink', name: 'メガドリンク', price: 3700, type: 'main' },
-        { id: 'shot', name: 'SHOT', price: 1500, type: 'other' },
-        { id: 'guestshot', name: 'ゲストSHOT', price: 1000, type: 'other' },
-        { id: 'karaoke', name: 'カラオケ5曲', price: 1000, type: 'other' },
-        // カスタムドリンクは動的に追加されるため、初期データには含めない
-      ];
-
-      // === DOM要素のキャッシュ ===
-      const nowElement = document.getElementById('now');
-      const startElement = document.getElementById('start');
-      const elapsedTimeElement = document.getElementById('elapsed_time');
-      const totalSetsElement = document.getElementById('total_sets');
-      const remainingElement = document.getElementById('remaining');
-
-      const currentGrandTotalElement = document.getElementById('current_grand_total');
-      const setSumElement = document.getElementById('set_sum');
-      const drinkSumElement = document.getElementById('drink_sum');
-      const subtotalSummaryElement = document.getElementById('subtotal_summary');
-      const serviceElement = document.getElementById('service');
-      const taxElement = document.getElementById('tax');
-      const grandTotalSummaryElement = document.getElementById('grand_total_summary');
-
-      const mainDrinksContainer = document.getElementById('drinkListContainer');
-      const otherDrinksContainer = document.getElementById('otherDrinksAccordionContent');
-      // customDrinkRowsContainerはrenderAllDrinkUIs内で取得し直す
-
-      const updateNotification = document.getElementById('updateNotification');
-      const updateButton = document.getElementById('updateButton');
-
-      // === 状態変数 ===
-      let drinkQuantities = {}; // 全ドリンクの数量を管理
-      let newDrinkCount = 0; // 現在追加されているカスタムドリンクの数
-      let newDrinkDefinitions = {}; // カスタムドリンクの定義（ID, 名前, 価格）を管理
-
-      let intervalId = null; // updateNow関数を呼び出すインターバルID
-      let sessionStartTimestamp = null; // 最初に「開始」ボタンを押したセッション開始時刻のタイムスタンプ
-      let pausedAccumulatedTime = 0; // 一時停止した時点での累積経過時間（ミリ秒）
-      let currentSetCount = 0; // 現在のセット数 (0から開始)
-
-      // === ヘルパー関数 ===
-
-      /**
-       * 数値を3桁区切りでフォーマットする
-       * @param {number} num
-       * @returns {string} フォーマットされた文字列
-       */
-      function formatNumber(num) {
-        return num.toLocaleString();
-      }
-
-      /**
-       * 時間（ミリ秒）をHH:MM:SS形式でフォーマットする
-       * @param {number} ms - ミリ秒
-       * @returns {string} フォーマットされた時間文字列
-       */
-      function formatTime(ms) {
-        const totalSeconds = Math.floor(ms / MS_PER_SECOND);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      }
-
-      // === ドリンクUI生成関数 ===
-
-      /**
-       * ドリンクカードを生成するヘルパー関数 (主要ドリンク用)
-       * @param {object} drink - ドリンクの定義オブジェクト
-       * @returns {HTMLElement} 生成されたカード要素
-       */
-      function createDrinkCard(drink) {
-        const currentQuantity = drinkQuantities[drink.id] || 0;
-        const card = document.createElement('div');
-        card.classList.add('drink-card');
-        card.dataset.drinkId = drink.id;
-
-        card.innerHTML = `
-          <div class="drink-item-name" title="${drink.name}">${drink.name}</div>
-          <div class="drink-item-price">${formatNumber(drink.price)}円</div>
-          <div class="drink-quantity-control">
-              <button class="plus-button" data-drink-id="${drink.id}">+</button>
-              <span class="drink-current-quantity">${currentQuantity}</span>
-              <button class="minus-button" data-drink-id="${drink.id}">-</button>
-          </div>
-          <div class="drink-item-total">${formatNumber(drink.price * currentQuantity)}円</div>
-        `;
-
-        card.querySelector('.minus-button').addEventListener('click', (event) => {
-          updateDrinkQuantity(event.target.dataset.drinkId, -1);
-        });
-        card.querySelector('.plus-button').addEventListener('click', (event) => {
-          updateDrinkQuantity(event.target.dataset.drinkId, 1);
-        });
-
-        return card;
-      }
-
-      /**
-       * ドリンクリストアイテムを生成するヘルパー関数 (アコーディオン内のリスト用)
-       * @param {object} drink - ドリンクの定義オブジェクト
-       * @returns {HTMLElement} 生成されたリストアイテム要素
-       */
-      function createAccordionListItem(drink) {
-          const currentQuantity = drinkQuantities[drink.id] || 0;
-
-          const item = document.createElement('div');
-          item.classList.add('accordion-item');
-          item.dataset.drinkId = drink.id;
-
-          item.innerHTML = `
-              <div class="accordion-item-info">
-                  <span class="accordion-item-name" title="${drink.name}">${drink.name}</span>
-                  <span class="accordion-item-price">${formatNumber(drink.price)}円</span>
-              </div>
-              <div class="accordion-item-control">
-                  <button class="plus-button" data-drink-id="${drink.id}">+</button>
-                  <span class="accordion-item-quantity">${currentQuantity}</span>
-                  <button class="minus-button" data-drink-id="${drink.id}">-</button>
-              </div>
-              <span class="accordion-item-total">${formatNumber(drink.price * currentQuantity)}円</span>
-          `;
-
-          item.querySelector('.minus-button').addEventListener('click', (event) => {
-              updateDrinkQuantity(event.target.dataset.drinkId, -1);
-          });
-          item.querySelector('.plus-button').addEventListener('click', (event) => {
-              updateDrinkQuantity(event.target.dataset.drinkId, 1);
-          });
-
-          return item;
-      }
-
-      /**
-       * カスタムドリンクのリストアイテムを生成する関数
-       * @param {string} id - カスタムドリンクのID
-       * @param {string} name - ドリンク名
-       * @param {number} price - 価格
-       * @returns {HTMLElement} 生成されたリストアイテム要素
-       */
-      function createCustomDrinkListItem(id, name, price) {
-        const currentQuantity = drinkQuantities[id] || 0;
-
-        const item = document.createElement('div');
-        item.classList.add('accordion-item', 'custom-drink-item'); // custom-drink-itemクラスを追加
-        item.dataset.drinkId = id;
-
-        item.innerHTML = `
-            <div class="accordion-item-info">
-                <input type="text" class="custom-drink-name-input" value="${name}" placeholder="ドリンク名" data-drink-id="${id}">
-                <input type="number" class="custom-drink-price-input" value="${price}" placeholder="金額" min="0" data-drink-id="${id}">円
-            </div>
-            <div class="accordion-item-control">
-                <button class="plus-button" data-drink-id="${id}">+</button>
-                <span class="accordion-item-quantity">${currentQuantity}</span>
-                <button class="minus-button" data-drink-id="${id}">-</button>
-            </div>
-            <span class="accordion-item-total">${formatNumber(price * currentQuantity)}円</span>
-        `;
-
-        // イベントリスナーを動的に追加
-        item.querySelector('.custom-drink-name-input').addEventListener('input', (event) => {
-            newDrinkDefinitions[id].name = event.target.value;
-        });
-        item.querySelector('.custom-drink-price-input').addEventListener('input', (event) => {
-            const newPrice = parseInt(event.target.value);
-            newDrinkDefinitions[id].price = isNaN(newPrice) ? 0 : newPrice;
-            updateDrinkQuantity(id, 0); // 価格変更時に合計を更新
-        });
-
-        item.querySelector('.minus-button').addEventListener('click', (event) => {
-            updateDrinkQuantity(event.target.dataset.drinkId, -1);
-        });
-        item.querySelector('.plus-button').addEventListener('click', (event) => {
-            updateDrinkQuantity(event.target.dataset.drinkId, 1);
-        });
-
-        return item;
-      }
-
-      /**
-       * 全てのドリンクUIをレンダリングする
-       */
-      function renderAllDrinkUIs() {
-        mainDrinksContainer.innerHTML = '';
-        otherDrinksContainer.innerHTML = ''; // Clear all content inside the accordion
-
-        // Render main drinks (cards)
-        drinks.filter(d => d.type === 'main').forEach(drink => {
-          drinkQuantities[drink.id] = drinkQuantities[drink.id] || 0;
-          mainDrinksContainer.appendChild(createDrinkCard(drink));
-        });
-
-        // Render other standard drinks (list items inside accordion)
-        drinks.filter(d => d.type === 'other').forEach(drink => {
-          drinkQuantities[drink.id] = drinkQuantities[drink.id] || 0;
-          otherDrinksContainer.appendChild(createAccordionListItem(drink));
-        });
-
-        // Render custom drinks (list items inside accordion)
-        Object.keys(newDrinkDefinitions).forEach(id => {
-            const customDrink = newDrinkDefinitions[id];
-            drinkQuantities[id] = drinkQuantities[id] || 0;
-            otherDrinksContainer.appendChild(createCustomDrinkListItem(id, customDrink.name, customDrink.price));
-        });
-
-        // Add the custom drink section header and button at the end of the accordion content if it's not already there
-        // This part was moved directly into the HTML structure, so no need to re-create it here.
-        // Ensure the button's listener is re-attached if it was removed by innerHTML = ''
-        const addNewDrinkRowButton = document.getElementById('addNewDrinkRowButton');
-        if (addNewDrinkRowButton) {
-            addNewDrinkRowButton.removeEventListener('click', addNewDrinkRow); // Remove old listener
-            addNewDrinkRowButton.addEventListener('click', addNewDrinkRow); // Add new listener
-        }
-
-
-        calculateTotal(); // Recalculate total after rendering all UIs
-      }
-
-      // === 主なロジック関数 ===
-
-      /**
-       * ドリンク数量を更新し、UIと合計を再計算する
-       * @param {string} drinkId - ドリンクのID
-       * @param {number} change - 数量の変更量 (+1 または -1)
-       */
-      function updateDrinkQuantity(drinkId, change) {
-        let currentQuantity = drinkQuantities[drinkId] || 0;
-        let newQuantity = currentQuantity + change;
-        if (newQuantity < 0) newQuantity = 0;
-        drinkQuantities[drinkId] = newQuantity; // 内部状態を更新
-
-        const drinkDef = drinks.find(d => d.id === drinkId) || newDrinkDefinitions[drinkId];
-        if (!drinkDef) return; // ドリンク定義が見つからない場合は終了
-
-        // UIを更新
-        const card = document.querySelector(`#drinkListContainer .drink-card[data-drink-id="${drinkId}"]`);
-        const accordionItem = document.querySelector(`#otherDrinksAccordionContent .accordion-item[data-drink-id="${drinkId}"]`);
-        const customItem = document.querySelector(`#otherDrinksAccordionContent .custom-drink-item[data-drink-id="${drinkId}"]`); // カスタムドリンクもアコーディオン内
-
-        let quantitySpan;
-        let totalSpan;
-        let priceValue = drinkDef.price; // カスタムドリンクの場合はnewDrinkDefinitionsから価格を取得
-
-        if (card) {
-          quantitySpan = card.querySelector('.drink-current-quantity');
-          totalSpan = card.querySelector('.drink-item-total');
-        } else if (accordionItem) { // 標準のその他のドリンクとカスタムドリンクのどちらもaccordion-item
-          quantitySpan = accordionItem.querySelector('.accordion-item-quantity');
-          totalSpan = accordionItem.querySelector('.accordion-item-total');
-          if (accordionItem.classList.contains('custom-drink-item')) {
-              priceValue = parseInt(accordionItem.querySelector('.custom-drink-price-input').value) || 0;
-          }
-        } else {
-          return;
-        }
-
-        quantitySpan.textContent = newQuantity;
-        totalSpan.textContent = formatNumber(priceValue * newQuantity) + '円';
-
-        calculateTotal(); // 全体の合計を再計算
-      }
-
-      /**
-       * 全ての合計金額を計算し表示を更新する
-       */
-      function calculateTotal() {
-        const SET_PRICE_A = 2500; // 1セット目の料金
-        const SET_PRICE_B = 3000; // 2セット目以降の料金
-
-        let calculatedSetTotal = 0;
-        if (currentSetCount >= 1) {
-          calculatedSetTotal = SET_PRICE_A + (currentSetCount - 1) * SET_PRICE_B;
-        }
-
-        let drinkTotal = 0;
-        // 標準ドリンクとカスタムドリンクの合計を計算
-        [...drinks, ...Object.values(newDrinkDefinitions)].forEach(drink => {
-            const quantity = drinkQuantities[drink.id] || 0;
-            const price = (drink.id.startsWith('custom_drink_')) ? (newDrinkDefinitions[drink.id].price || 0) : drink.price;
-            drinkTotal += price * quantity;
-        });
-
-        const subtotal = calculatedSetTotal + drinkTotal;
-        const service = Math.floor(subtotal * SERVICE_CHARGE_RATE);
-        const subtotalWithService = subtotal + service;
-        const tax = Math.floor(subtotalWithService * TAX_RATE);
-        let finalTotal = subtotalWithService + tax;
-
-        finalTotal = Math.round(finalTotal / 100) * 100;
-
-        currentGrandTotalElement.innerHTML = `<strong>${formatNumber(finalTotal)}円</strong>`;
-        totalSetsElement.innerText = currentSetCount;
-
-        setSumElement.innerText = `${formatNumber(calculatedSetTotal)}円`;
-        drinkSumElement.innerText = `${formatNumber(drinkTotal)}円`;
-        subtotalSummaryElement.innerText = `${formatNumber(subtotal)}円`;
-        serviceElement.innerText = `${formatNumber(service)}円`;
-        taxElement.innerText = `${formatNumber(tax)}円`;
-        grandTotalSummaryElement.innerHTML = `<strong>${formatNumber(finalTotal)}円</strong>`;
-      }
-
-      /**
-       * 新しいカスタムドリンク行を追加する
-       */
-      function addNewDrinkRow() {
-        if (newDrinkCount < MAX_NEW_DRINKS) {
-          newDrinkCount++;
-          const newId = `custom_drink_${new Date().getTime()}`; // ユニークなIDを生成
-          newDrinkDefinitions[newId] = { id: newId, name: '', price: 0 }; // 新しいカスタムドリンクの定義を追加
-          drinkQuantities[newId] = 0; // 数量を初期化
-
-          // renderAllDrinkUIsを呼び出してUI全体を再レンダリング
-          renderAllDrinkUIs();
-        } else {
-          alert(`追加できるカスタムドリンクは${MAX_NEW_DRINKS}個までです。`);
-        }
-      }
-
-      /**
-       * 現在時刻とタイマーの状態を更新する
-       */
-      function updateNow() {
-        const now = new Date();
-        nowElement.innerText = now.toLocaleTimeString();
-
-        if (sessionStartTimestamp) {
-          const currentTime = now.getTime();
-          const currentElapsedTime = (currentTime - sessionStartTimestamp) + pausedAccumulatedTime;
-
-          elapsedTimeElement.innerText = formatTime(currentElapsedTime);
-
-          let newSetCount = Math.floor(currentElapsedTime / SET_DURATION_MS) + 1;
-          if (newSetCount < 1) newSetCount = 1;
-
-          if (newSetCount > currentSetCount) {
-            currentSetCount = newSetCount;
-            calculateTotal();
-          } else if (currentSetCount === 0 && newSetCount === 1) {
-            currentSetCount = newSetCount;
-            calculateTotal();
-          }
-
-          const currentSetElapsedMs = currentElapsedTime % SET_DURATION_MS;
-          const remainingMs = SET_DURATION_MS - currentSetElapsedMs;
-
-          if (remainingMs > 0) {
-            const remainingMins = Math.floor(remainingMs / MS_PER_MINUTE);
-            const remainingSecs = Math.floor((remainingMs % MS_PER_MINUTE) / MS_PER_SECOND);
-            remainingElement.innerText = `${String(remainingMins).padStart(2, '0')}:${String(remainingSecs).padStart(2, '0')}`;
-
-            if (remainingMins < 5 && currentSetCount > 0) {
-              remainingElement.classList.add('alert');
-            } else {
-              remainingElement.classList.remove('alert');
-            }
-          } else {
-            remainingElement.innerText = "00:00";
-            remainingElement.classList.remove('alert');
-          }
-        } else {
-          elapsedTimeElement.innerText = '';
-          remainingElement.innerText = '';
-          remainingElement.classList.remove('alert');
-        }
-      }
-
-      /**
-       * タイマーを開始する
-       */
-      function startTimer() {
-        if (!intervalId) {
-          const now = new Date().getTime();
-          if (!sessionStartTimestamp) {
-            sessionStartTimestamp = now;
-            pausedAccumulatedTime = 0;
-            currentSetCount = 1;
-            startElement.innerText = new Date(sessionStartTimestamp).toLocaleTimeString();
-          } else {
-            sessionStartTimestamp = now - pausedAccumulatedTime;
-          }
-          intervalId = setInterval(updateNow, MS_PER_SECOND);
-          updateNow();
-          calculateTotal();
-        }
-      }
-
-      /**
-       * タイマーを一時停止する
-       */
-      function pauseTimer() {
-        if (intervalId) {
-          clearInterval(intervalId);
-          intervalId = null;
-          if (sessionStartTimestamp) {
-            pausedAccumulatedTime += (new Date().getTime() - sessionStartTimestamp);
-            sessionStartTimestamp = null;
-          }
-        }
-      }
-
-      /**
-       * タイマーを終了する（リセットせず、カウントを止める）
-       */
-      function endTimer() {
-        pauseTimer();
-        startElement.innerText = '';
-        remainingElement.innerText = '';
-        elapsedTimeElement.innerText = '';
-        remainingElement.classList.remove('alert');
-
-        sessionStartTimestamp = null;
-        pausedAccumulatedTime = 0;
-        currentSetCount = 0;
-        calculateTotal();
-      }
-
-      /**
-       * タイマーのみをリセットする
-       */
-      function resetTimer() {
-        endTimer();
-      }
-
-      /**
-       * すべてをリセットする（タイマーと会計データ）
-       */
-      function resetAll() {
-        endTimer(); // タイマーを停止し、時間関連の状態をリセット
-
-        drinkQuantities = {}; // 全ドリンクの数量をリセット
-        newDrinkDefinitions = {}; // カスタムドリンクの定義をリセット
-        newDrinkCount = 0;
-
-        renderAllDrinkUIs(); // UIを再レンダリングして数量をリセット
-
-        calculateTotal(); // 全てリセット後、会計金額を再計算
-      }
-
-      /**
-       * Service Workerの更新通知バーを表示する
-       */
-      let serviceWorkerNewWorker;
-
-      function showUpdateBar() {
-        if (updateNotification && updateButton) {
-          updateNotification.style.display = 'block';
-          updateButton.addEventListener('click', () => {
-            if (serviceWorkerNewWorker) {
-              serviceWorkerNewWorker.postMessage({ action: 'skipWaiting' });
-            }
-          });
-        }
-      }
-
-      /**
-       * イベントリスナーの登録
-       */
-      function registerEventListeners() {
-        document.addEventListener('touchend', function(event) {
-            if (event.detail > 1) {
-                event.preventDefault();
-            }
-        }, { passive: false });
-
-        // 時間管理ボタン
-        document.getElementById('startButton').addEventListener('click', startTimer);
-        document.getElementById('pauseButton').addEventListener('click', pauseTimer);
-        document.getElementById('endButton').addEventListener('click', endTimer);
-        document.getElementById('resetTimerButton').addEventListener('click', resetTimer);
-
-        // カスタムドリンク追加ボタンはrenderAllDrinkUIsで再登録されるため、ここでは不要
-        // document.getElementById('addNewDrinkRowButton').addEventListener('click', addNewDrinkRow);
-
-        // 全てリセットボタン (下部固定)
-        document.getElementById('resetAllButton').addEventListener('click', resetAll);
-
-        // アコーディオン機能の初期化
-        setupAccordion();
-
-        // Service Workerの登録
-        if ('serviceWorker' in navigator) {
-          window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./service-worker.js')
-              .then(reg => {
-                console.log('ServiceWorker registration successful with scope: ', reg.scope);
-
-                reg.addEventListener('updatefound', () => {
-                  serviceWorkerNewWorker = reg.installing;
-
-                  serviceWorkerNewWorker.addEventListener('statechange', () => {
-                    if (serviceWorkerNewWorker.state === 'installed') {
-                      if (navigator.serviceWorker.controller) {
-                        showUpdateBar();
-                      }
-                    }
-                  });
-                });
-              })
-              .catch(err => {
-                console.log('ServiceWorker registration failed: ', err);
-              });
-
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-              window.location.reload();
-            });
-          });
-        }
-      }
-
-      // === 初期化処理 ===
-      document.addEventListener('DOMContentLoaded', () => {
-        renderAllDrinkUIs(); // 全UIをレンダリング
-        registerEventListeners(); // イベントリスナーを登録
-        updateNow(); // 現在時刻の表示
-        calculateTotal(); // 合計金額の計算と表示更新
+  <!-- 時間管理 + 退店逆算 -->
+  <div class="card">
+    <div class="card-title">時間管理</div>
+    <div class="time-grid">
+      <div class="time-item"><label>現在時刻</label><div class="value" id="now">--:--:--</div></div>
+      <div class="time-item"><label>開始時刻</label><div class="value" id="start">--</div></div>
+      <div class="time-item"><label>経過時間</label><div class="value" id="elapsed_time">--:--:--</div></div>
+      <div class="time-item"><label>セット数</label><div class="value"><span class="set-badge" id="total_sets">0</span></div></div>
+      <div class="time-item wide"><label>現セット残り</label><div class="value" id="remaining">--:--</div></div>
+    </div>
+    <div class="time-buttons">
+      <button class="btn btn-primary" id="startButton">▶ 開始</button>
+      <button class="btn btn-ghost" id="pauseButton">⏸ 一時停止</button>
+      <button class="btn btn-ghost" id="endButton">⏹ 終了</button>
+      <button class="btn btn-danger" id="resetTimerButton">↺ リセット</button>
+    </div>
+    <div id="checkout-section">
+      <div class="checkout-input-row" style="margin-top:14px;">
+        <label>退店予定時刻</label>
+        <input type="time" class="checkout-time-input" id="checkout-time-input">
+      </div>
+      <div id="checkout-result">
+        <div class="checkout-row"><span class="cr-label">退店まで</span><span class="cr-val" id="co-timeleft"></span></div>
+        <div class="checkout-row"><span class="cr-label">追加セット数</span><span class="cr-val" id="co-extra-sets"></span></div>
+        <div class="checkout-row"><span class="cr-label">追加セット料金(税込)</span><span class="cr-val" id="co-extra-cost"></span></div>
+        <div class="checkout-row"><span class="cr-label">次の切替まで</span><span class="cr-val" id="co-next-set"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主要ドリンク -->
+  <div class="card">
+    <div class="card-title">主要ドリンク</div>
+    <div id="drinkListContainer"></div>
+  </div>
+
+  <!-- その他ドリンク -->
+  <div class="accordion-header" id="otherDrinksAccordionHeader">
+    その他のドリンク <span class="arrow">▼</span>
+  </div>
+  <div class="accordion-content" id="otherDrinksAccordionContent">
+    <div id="newDrinkRowsContainer"></div>
+    <button class="add-custom-btn" id="addNewDrinkRowButton">＋ カスタムドリンク追加</button>
+  </div>
+
+  <!-- 会計サマリー -->
+  <div class="card">
+    <div class="card-title">会計サマリー</div>
+    <table class="summary-table">
+      <tr><td>セット合計</td><td id="set_sum">¥0</td></tr>
+      <tr><td>ドリンク合計</td><td id="drink_sum">¥0</td></tr>
+      <tr><td>小計</td><td id="subtotal_summary">¥0</td></tr>
+      <tr><td>サービス料 (10%)</td><td id="service">¥0</td></tr>
+      <tr><td>消費税 (10%)</td><td id="tax">¥0</td></tr>
+      <tr class="total-row"><td>合計金額</td><td id="grand_total_summary">¥0</td></tr>
+    </table>
+  </div>
+
+  <!-- 訪問比較 -->
+  <div class="card">
+    <div class="card-title">訪問比較</div>
+    <div class="compare-grid">
+      <div class="compare-item"><div class="ci-label">今回</div><div class="ci-val" id="compare-current">¥0</div></div>
+      <div class="compare-item"><div class="ci-label">平均</div><div class="ci-val" id="compare-avg">—</div><div class="ci-sub" id="compare-count"></div></div>
+      <div class="compare-item"><div class="ci-label">前回比</div><div class="ci-val" id="compare-diff">—</div><div class="ci-sub" id="compare-diff-sub"></div></div>
+    </div>
+  </div>
+
+  <!-- 履歴 -->
+  <div class="card">
+    <div class="card-title">
+      会計履歴
+      <button class="history-clear-btn" id="clearHistoryBtn">全削除</button>
+    </div>
+    <div id="history-list"><div class="history-empty">履歴はまだありません</div></div>
+  </div>
+
+</div>
+
+<div class="fixed-bottom-bar">
+  <button class="btn btn-danger" id="resetAllButton">リセット</button>
+  <button class="btn btn-save" id="saveHistoryBtn">💾 会計保存</button>
+  <button class="btn btn-ghost" onclick="window.location.href='simulation.html'">シミュ</button>
+  <button class="btn btn-ghost" onclick="window.location.href='menu.html'">メニュー</button>
+</div>
+
+<script>
+(function () {
+  /* ── 定数 ── */
+  const SET_MIN = 40;
+  const MS_S = 1000, MS_M = 60000, SET_MS = SET_MIN * MS_M;
+  const MAX_CUSTOM = 5;
+  const SVC = 0.10, TAX = 0.10;
+  const SET_A = 2500, SET_B = 3000;
+  const KEY_HIST   = 'accounting_history';
+  const KEY_TIMER  = 'timer_state';
+  const KEY_BUDGET = 'budget_setting';
+  const KEY_CHECKOUT = 'checkout_time';
+
+  const CALC_DRINKS = [
+    { name: 'Lドリンク',   price: 1700 },
+    { name: 'メガドリンク', price: 3700 },
+    { name: 'SHOT',        price: 1500 },
+    { name: 'ゲストSHOT',  price: 1000 },
+  ];
+
+  const DRINKS = [
+    { id: 'ldrink',    name: 'Lドリンク',   price: 1700, type: 'main' },
+    { id: 'megadrink', name: 'メガドリンク', price: 3700, type: 'main' },
+    { id: 'shot',      name: 'SHOT',        price: 1500, type: 'other' },
+    { id: 'guestshot', name: 'ゲストSHOT',  price: 1000, type: 'other' },
+    { id: 'karaoke',   name: 'カラオケ5曲', price: 1000, type: 'other' },
+  ];
+
+  const $  = id => document.getElementById(id);
+  const pad = n  => String(n).padStart(2, '0');
+  const fmtMoney = n => '¥' + n.toLocaleString();
+  const fmtNum   = n => n.toLocaleString();
+  const fmtMs    = ms => {
+    const s = Math.floor(ms / 1000);
+    return `${pad(Math.floor(s/3600))}:${pad(Math.floor((s%3600)/60))}:${pad(s%60)}`;
+  };
+
+  /* ── 状態 ── */
+  let drinkQty  = {}, customCount = 0, customDefs = {};
+  let timerId   = null, tsStart = null, tsPaused = 0, setCount = 0;
+  let budget    = 0;
+  let swNewWorker;
+
+  /* ━━━━━ 合計計算 ━━━━━ */
+  function calcTotal() {
+    let setTotal = setCount >= 1 ? SET_A + (setCount - 1) * SET_B : 0;
+    let drinkTotal = 0;
+    [...DRINKS, ...Object.values(customDefs)].forEach(d => {
+      const qty   = drinkQty[d.id] || 0;
+      const price = d.id.startsWith('custom_') ? (customDefs[d.id]?.price || 0) : d.price;
+      drinkTotal += price * qty;
+    });
+
+    const sub      = setTotal + drinkTotal;
+    const svc      = Math.floor(sub * SVC);
+    const subSvc   = sub + svc;
+    const tax      = Math.floor(subSvc * TAX);
+    const total    = Math.round((subSvc + tax) / 100) * 100;
+
+    $('current_grand_total').innerHTML = `${fmtNum(total)}<span>円</span>`;
+    $('total_sets').textContent   = setCount;
+    $('set_sum').textContent      = fmtMoney(setTotal);
+    $('drink_sum').textContent    = fmtMoney(drinkTotal);
+    $('subtotal_summary').textContent = fmtMoney(sub);
+    $('service').textContent      = fmtMoney(svc);
+    $('tax').textContent          = fmtMoney(tax);
+    $('grand_total_summary').textContent = fmtMoney(total);
+
+    updateBudgetUI(total);
+    updateCompare(total);
+
+    return { total, setTotal, drinkTotal, setCount };
+  }
+
+  /* ━━━━━ ① 予算バー ━━━━━ */
+  function setBudget(amount) {
+    budget = amount;
+    if (amount > 0) {
+      $('budget-label-amount').textContent = fmtMoney(amount);
+    }
+    const r = calcTotal();
+    updateBudgetUI(r.total);
+  }
+
+  function loadBudget() {
+    // 毎回入店時に入力するため引き継ぎなし
+  }
+
+  function updateBudgetUI(total) {
+    const wrap = $('budget-bar-wrap');
+    const calc = $('drink-calc-section');
+    if (!budget) { wrap.classList.remove('visible'); calc.classList.remove('visible'); return; }
+    wrap.classList.add('visible');
+    $('budget-label-amount').textContent = fmtMoney(budget);
+
+    const ratio  = Math.min(total / budget, 1);
+    const remain = budget - total;
+    const bar    = $('budget-bar');
+    bar.style.width = (ratio * 100) + '%';
+    bar.className   = ratio >= 1 ? 'danger' : ratio >= 0.8 ? 'warn' : '';
+
+    const remEl = $('budget-remaining-text');
+    if (remain >= 0) {
+      remEl.textContent = `残り ${fmtMoney(remain)}`;
+      remEl.style.color = ratio >= 0.8 ? 'var(--accent-orange)' : 'var(--accent-green)';
+    } else {
+      remEl.textContent = `超過 ${fmtMoney(Math.abs(remain))}`;
+      remEl.style.color = 'var(--accent-red)';
+    }
+    $('budget-alert').className = remain < 0 ? 'show' : '';
+
+    /* ② あと何杯 */
+    if (remain > 0) {
+      calc.classList.add('visible');
+      const grid = $('drink-calc-grid');
+      grid.innerHTML = '';
+      CALC_DRINKS.forEach(d => {
+        const costPerDrink = Math.ceil(d.price * 1.21 / 100) * 100;
+        const can = Math.floor(remain / costPerDrink);
+        const el  = document.createElement('div');
+        el.className = 'drink-calc-item';
+        el.innerHTML = `<div class="dc-name">${d.name}</div>
+          <div class="dc-count${can === 0 ? ' ng' : ''}">${can > 0 ? can : '×'}</div>
+          <div class="dc-unit">${can > 0 ? '杯まで可' : '予算不足'}</div>`;
+        grid.appendChild(el);
       });
+    } else {
+      calc.classList.remove('visible');
+    }
+  }
 
-      // 1秒ごとに現在の時刻を更新
-      setInterval(() => {
-        nowElement.innerText = new Date().toLocaleTimeString();
-      }, MS_PER_SECOND);
+  /* ━━━━━ ④ 訪問比較 ━━━━━ */
+  function updateCompare(total) {
+    $('compare-current').textContent = fmtMoney(total);
+    const hist = loadHistory();
+    if (!hist.length) {
+      ['compare-avg','compare-diff'].forEach(id => $(id).textContent = '—');
+      ['compare-count','compare-diff-sub'].forEach(id => $(id).textContent = '');
+      return;
+    }
+    const avg  = Math.round(hist.reduce((s, r) => s + r.total, 0) / hist.length);
+    const last = hist[hist.length - 1].total;
+    const diff = total - last;
+    $('compare-avg').textContent   = fmtMoney(avg);
+    $('compare-count').textContent = `${hist.length}回平均`;
+    $('compare-diff').textContent  = diff === 0 ? '±0' : (diff > 0 ? '+' : '') + fmtMoney(diff);
+    $('compare-diff').className    = 'ci-val' + (diff > 0 ? ' up' : diff < 0 ? ' down' : '');
+    $('compare-diff-sub').textContent = `前回 ${fmtMoney(last)}`;
+  }
 
-      // アコーディオン機能の初期化
-      function setupAccordion() {
-        const header = document.getElementById('otherDrinksAccordionHeader');
-        const content = document.getElementById('otherDrinksAccordionContent');
+  /* ━━━━━ ③ 退店逆算 ━━━━━ */
+  function updateCheckout() {
+    const val   = $('checkout-time-input').value;
+    const resEl = $('checkout-result');
+    if (!val || !tsStart) { resEl.classList.remove('visible'); return; }
 
-        header.addEventListener('click', () => {
-          header.classList.toggle('active');
-          content.classList.toggle('open');
-        });
+    const now    = new Date();
+    const [hh, mm] = val.split(':').map(Number);
+    const target = new Date(now);
+    target.setHours(hh, mm, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1);
+
+    const msLeft = target - now;
+    if (msLeft <= 0) { resEl.classList.remove('visible'); return; }
+    resEl.classList.add('visible');
+
+    const totalMins = Math.floor(msLeft / MS_M);
+    const h = Math.floor(totalMins / 60), m = totalMins % 60;
+    $('co-timeleft').textContent = h > 0 ? `${h}時間${m}分` : `${m}分`;
+
+    const elapsed  = (Date.now() - tsStart) + tsPaused;
+    const remInSet = SET_MS - (elapsed % SET_MS);
+    const msAfter  = msLeft - remInSet;
+    const extra    = msAfter > 0 ? Math.ceil(msAfter / SET_MS) : 0;
+
+    $('co-extra-sets').textContent = extra > 0 ? `+${extra}セット` : '追加なし';
+    $('co-extra-sets').className   = 'cr-val ' + (extra > 0 ? 'warn' : 'safe');
+
+    const extraCostTax = extra > 0 ? Math.round(extra * SET_B * 1.21 / 100) * 100 : 0;
+    $('co-extra-cost').textContent = extra > 0 ? `+${fmtMoney(extraCostTax)}` : '—';
+    $('co-extra-cost').className   = 'cr-val ' + (extra > 0 ? 'warn' : 'safe');
+
+    const rm = Math.floor(remInSet / MS_M), rs = Math.floor((remInSet % MS_M) / MS_S);
+    $('co-next-set').textContent = `${pad(rm)}:${pad(rs)}`;
+    $('co-next-set').className   = 'cr-val ' + (rm < 5 ? 'danger' : 'safe');
+  }
+
+  /* ━━━━━ ドリンクUI ━━━━━ */
+  const mainEl  = $('drinkListContainer');
+  const otherEl = $('otherDrinksAccordionContent');
+
+  function mkCard(d) {
+    const qty = drinkQty[d.id] || 0;
+    const el  = document.createElement('div');
+    el.className = 'drink-card' + (qty > 0 ? ' has-items' : '');
+    el.dataset.drinkId = d.id;
+    el.innerHTML = `
+      <div class="drink-item-name" title="${d.name}">${d.name}</div>
+      <div class="drink-item-price">${fmtNum(d.price)}円</div>
+      <div class="drink-qty-row">
+        <button class="qty-btn minus-button" data-id="${d.id}">−</button>
+        <span class="drink-current-quantity">${qty}</span>
+        <button class="qty-btn plus-button" data-id="${d.id}">＋</button>
+      </div>
+      <div class="drink-item-total">${qty > 0 ? fmtMoney(d.price * qty) : ''}</div>`;
+    el.querySelector('.minus-button').addEventListener('click', e => updateQty(e.target.dataset.id, -1));
+    el.querySelector('.plus-button').addEventListener('click',  e => updateQty(e.target.dataset.id,  1));
+    return el;
+  }
+
+  function mkAcc(d) {
+    const qty = drinkQty[d.id] || 0;
+    const el  = document.createElement('div');
+    el.className = 'accordion-item';
+    el.dataset.drinkId = d.id;
+    el.innerHTML = `
+      <div class="accordion-item-info">
+        <div class="accordion-item-name">${d.name}</div>
+        <div class="accordion-item-price">${fmtNum(d.price)}円</div>
+      </div>
+      <div class="accordion-item-control">
+        <button class="plus-button"  data-id="${d.id}">＋</button>
+        <span class="accordion-item-quantity">${qty}</span>
+        <button class="minus-button" data-id="${d.id}">−</button>
+      </div>
+      <span class="accordion-item-total">${qty > 0 ? fmtMoney(d.price * qty) : ''}</span>`;
+    el.querySelector('.minus-button').addEventListener('click', e => updateQty(e.target.dataset.id, -1));
+    el.querySelector('.plus-button').addEventListener('click',  e => updateQty(e.target.dataset.id,  1));
+    return el;
+  }
+
+  function mkCustom(id, name, price) {
+    const qty = drinkQty[id] || 0;
+    const el  = document.createElement('div');
+    el.className = 'accordion-item custom-drink-item';
+    el.dataset.drinkId = id;
+    el.innerHTML = `
+      <div class="accordion-item-info">
+        <input type="text"   class="custom-drink-name-input"  value="${name}"        placeholder="ドリンク名">
+        <div class="custom-input-row">
+          <input type="number" class="custom-drink-price-input" value="${price || ''}" placeholder="金額" min="0">
+          <span>円</span>
+        </div>
+      </div>
+      <div class="accordion-item-control">
+        <button class="plus-button"  data-id="${id}">＋</button>
+        <span class="accordion-item-quantity">${qty}</span>
+        <button class="minus-button" data-id="${id}">−</button>
+      </div>
+      <span class="accordion-item-total">${qty > 0 && price > 0 ? fmtMoney(price * qty) : ''}</span>`;
+    el.querySelector('.custom-drink-name-input').addEventListener('input', e => { customDefs[id].name = e.target.value; });
+    el.querySelector('.custom-drink-price-input').addEventListener('input', e => {
+      customDefs[id].price = parseInt(e.target.value) || 0;
+      updateQty(id, 0);
+    });
+    el.querySelector('.minus-button').addEventListener('click', e => updateQty(e.target.dataset.id, -1));
+    el.querySelector('.plus-button').addEventListener('click',  e => updateQty(e.target.dataset.id,  1));
+    return el;
+  }
+
+  function renderDrinks() {
+    mainEl.innerHTML = '';
+    const ndc = $('newDrinkRowsContainer');
+    if (ndc) ndc.innerHTML = '';
+
+    DRINKS.filter(d => d.type === 'main').forEach(d => {
+      drinkQty[d.id] = drinkQty[d.id] || 0;
+      mainEl.appendChild(mkCard(d));
+    });
+    DRINKS.filter(d => d.type === 'other').forEach(d => {
+      drinkQty[d.id] = drinkQty[d.id] || 0;
+      if (ndc) ndc.appendChild(mkAcc(d));
+    });
+    Object.keys(customDefs).forEach(id => {
+      drinkQty[id] = drinkQty[id] || 0;
+      if (ndc) ndc.appendChild(mkCustom(id, customDefs[id].name, customDefs[id].price));
+    });
+    const addBtn = $('addNewDrinkRowButton');
+    if (addBtn) addBtn.onclick = addCustom;
+    calcTotal();
+  }
+
+  function updateQty(id, delta) {
+    drinkQty[id] = Math.max(0, (drinkQty[id] || 0) + delta);
+    const qty = drinkQty[id];
+    const def = DRINKS.find(d => d.id === id) || customDefs[id];
+    if (!def) return;
+
+    const card = mainEl.querySelector(`.drink-card[data-drink-id="${id}"]`);
+    const acc  = otherEl.querySelector(`.accordion-item[data-drink-id="${id}"]`);
+
+    if (card) {
+      card.querySelector('.drink-current-quantity').textContent = qty;
+      card.querySelector('.drink-item-total').textContent = qty > 0 ? fmtMoney(def.price * qty) : '';
+      card.classList.toggle('has-items', qty > 0);
+    } else if (acc) {
+      acc.querySelector('.accordion-item-quantity').textContent = qty;
+      let price = def.price;
+      if (acc.classList.contains('custom-drink-item'))
+        price = parseInt(acc.querySelector('.custom-drink-price-input').value) || 0;
+      acc.querySelector('.accordion-item-total').textContent = qty > 0 && price > 0 ? fmtMoney(price * qty) : '';
+    }
+    calcTotal();
+  }
+
+  function addCustom() {
+    if (customCount >= MAX_CUSTOM) { alert(`カスタムドリンクは${MAX_CUSTOM}個まで`); return; }
+    customCount++;
+    const id = `custom_${Date.now()}`;
+    customDefs[id] = { id, name: '', price: 0 };
+    drinkQty[id]   = 0;
+    const ndc = $('newDrinkRowsContainer');
+    if (ndc) ndc.appendChild(mkCustom(id, '', 0));
+    calcTotal();
+  }
+
+  /* ━━━━━ タイマー永続化 ━━━━━ */
+  function saveTimer() {
+    localStorage.setItem(KEY_TIMER, JSON.stringify({ tsStart, tsPaused, isRunning: tsStart !== null }));
+  }
+  function clearTimer() { localStorage.removeItem(KEY_TIMER); }
+
+  function loadTimer() {
+    try {
+      const raw = localStorage.getItem(KEY_TIMER);
+      if (!raw) return;
+      const s = JSON.parse(raw);
+      tsPaused = s.tsPaused || 0;
+      if (s.isRunning && s.tsStart) {
+        tsStart   = s.tsStart;
+        $('start').textContent = new Date(tsStart).toLocaleTimeString('ja-JP');
+        const elapsed = (Date.now() - tsStart) + tsPaused;
+        setCount = Math.max(1, Math.floor(elapsed / SET_MS) + 1);
+        timerId  = setInterval(tick, 1000);
+        tick(); calcTotal();
+      } else if (!s.isRunning && tsPaused > 0) {
+        const elapsed = tsPaused;
+        setCount = Math.max(1, Math.floor(elapsed / SET_MS) + 1);
+        $('elapsed_time').textContent = fmtMs(elapsed);
+        const rem = SET_MS - (elapsed % SET_MS);
+        $('remaining').textContent = `${pad(Math.floor(rem/MS_M))}:${pad(Math.floor((rem%MS_M)/MS_S))}`;
+        $('start').textContent = new Date(Date.now() - elapsed).toLocaleTimeString('ja-JP');
+        calcTotal();
       }
+    } catch(e) {}
+  }
 
-    })(); // 即時関数の終わり
-  </script>
+  /* ━━━━━ タイマー ━━━━━ */
+  function tick() {
+    const now = new Date();
+    $('now').textContent = now.toLocaleTimeString('ja-JP');
+    if (!tsStart) return;
+
+    const elapsed = (now.getTime() - tsStart) + tsPaused;
+    $('elapsed_time').textContent = fmtMs(elapsed);
+
+    const newSet = Math.max(1, Math.floor(elapsed / SET_MS) + 1);
+    if (newSet !== setCount) { setCount = newSet; calcTotal(); }
+
+    const rem = SET_MS - (elapsed % SET_MS);
+    const rm  = Math.floor(rem / MS_M);
+    const rs  = Math.floor((rem % MS_M) / MS_S);
+    $('remaining').textContent = `${pad(rm)}:${pad(rs)}`;
+    $('remaining').classList.toggle('alert', rm < 5 && setCount > 0);
+
+    updateCheckout();
+  }
+
+  function startTimer() {
+    if (timerId) return;
+    const now = Date.now();
+    if (!tsStart && tsPaused === 0) {
+      tsStart = now; tsPaused = 0; setCount = 1;
+      $('start').textContent = new Date(now).toLocaleTimeString('ja-JP');
+    } else {
+      tsStart = now;
+    }
+    timerId = setInterval(tick, 1000);
+    tick(); calcTotal(); saveTimer();
+  }
+
+  function pauseTimer() {
+    if (!timerId) return;
+    clearInterval(timerId); timerId = null;
+    if (tsStart) { tsPaused += Date.now() - tsStart; tsStart = null; }
+    saveTimer();
+  }
+
+  function endTimer() {
+    pauseTimer();
+    $('start').textContent = $('elapsed_time').textContent = '--';
+    $('remaining').textContent = '--:--';
+    $('remaining').classList.remove('alert');
+    tsStart = null; tsPaused = 0; setCount = 0;
+    clearTimer(); calcTotal();
+    $('checkout-result').classList.remove('visible');
+  }
+
+  function resetAll() {
+    if (!confirm('会計をリセットしますか？')) return;
+    endTimer();
+    drinkQty = {}; customDefs = {}; customCount = 0;
+    renderDrinks(); calcTotal();
+  }
+
+  /* ━━━━━ 履歴 ━━━━━ */
+  function loadHistory() {
+    try { return JSON.parse(localStorage.getItem(KEY_HIST) || '[]'); } catch(e) { return []; }
+  }
+
+  function renderHistory() {
+    const hist = loadHistory();
+    const list = $('history-list');
+    if (!hist.length) { list.innerHTML = '<div class="history-empty">履歴はまだありません</div>'; return; }
+    list.innerHTML = '';
+    [...hist].reverse().forEach(rec => {
+      const d = new Date(rec.timestamp);
+      const ds = `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${d.toLocaleTimeString('ja-JP')}`;
+      const el = document.createElement('div');
+      el.className = 'history-item';
+      el.innerHTML = `
+        <div class="history-item-header">
+          <div class="history-item-date">${ds}</div>
+          <div class="history-item-total">${fmtMoney(rec.total)}</div>
+        </div>
+        <div class="history-item-detail">${rec.sets}セット ／ ドリンク ${fmtMoney(rec.drinkTotal)} ／ サービス・税込</div>`;
+      list.appendChild(el);
+    });
+  }
+
+  function saveBill() {
+    const r = calcTotal();
+    if (r.total === 0) { alert('合計が0円です'); return; }
+    const hist = loadHistory();
+    hist.push({ timestamp: Date.now(), total: r.total, sets: r.setCount, drinkTotal: r.drinkTotal });
+    if (hist.length > 50) hist.shift();
+    localStorage.setItem(KEY_HIST, JSON.stringify(hist));
+    renderHistory(); updateCompare(r.total);
+    const btn = $('saveHistoryBtn'), orig = btn.textContent;
+    btn.textContent = '✓ 保存完了！';
+    btn.style.background = 'linear-gradient(135deg,#27ae60,#2ecc71)';
+    setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 1500);
+  }
+
+  /* ━━━━━ アコーディオン ━━━━━ */
+  function setupAccordion() {
+    const h = $('otherDrinksAccordionHeader'), c = $('otherDrinksAccordionContent');
+    h.addEventListener('click', () => { h.classList.toggle('active'); c.classList.toggle('open'); });
+  }
+
+  /* ━━━━━ Service Worker ━━━━━ */
+  function showUpdateBar() {
+    const n = $('updateNotification'); if (n) n.style.display = 'block';
+    const b = $('updateButton');
+    if (b) b.addEventListener('click', () => { if (swNewWorker) swNewWorker.postMessage({ action: 'skipWaiting' }); });
+  }
+
+  /* ━━━━━ 初期化 ━━━━━ */
+  document.addEventListener('DOMContentLoaded', () => {
+    loadBudget();
+    renderDrinks();
+    setupAccordion();
+    calcTotal();
+    renderHistory();
+    loadTimer();
+
+    $('checkout-time-input').addEventListener('change', updateCheckout);
+    $('checkout-time-input').addEventListener('input', updateCheckout);
+    $('pauseButton').addEventListener('click', pauseTimer);
+    $('endButton').addEventListener('click', endTimer);
+    $('resetTimerButton').addEventListener('click', endTimer);
+    $('resetAllButton').addEventListener('click', resetAll);
+    $('saveHistoryBtn').addEventListener('click', saveBill);
+
+    $('budget-set-btn').addEventListener('click', () => {
+      const v = parseInt($('budget-input').value);
+      if (!v || v <= 0) { alert('正しい金額を入力してください'); return; }
+      setBudget(v);
+    });
+    $('budget-input').addEventListener('keydown', e => { if (e.key === 'Enter') $('budget-set-btn').click(); });
+    $('budget-clear-btn').addEventListener('click', () => {
+      budget = 0; $('budget-input').value = '';
+      $('budget-bar-wrap').classList.remove('visible');
+      $('drink-calc-section').classList.remove('visible');
+    });
+
+    $('startButton').addEventListener('click', startTimer);
+
+    $('clearHistoryBtn').addEventListener('click', () => {
+      if (!confirm('履歴を全て削除しますか？')) return;
+      localStorage.removeItem(KEY_HIST);
+      renderHistory(); updateCompare(0);
+    });
+
+    document.addEventListener('touchend', e => { if (e.detail > 1) e.preventDefault(); }, { passive: false });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => {
+            reg.addEventListener('updatefound', () => {
+              swNewWorker = reg.installing;
+              swNewWorker.addEventListener('statechange', () => {
+                if (swNewWorker.state === 'installed' && navigator.serviceWorker.controller) showUpdateBar();
+              });
+            });
+          }).catch(e => console.log('SW:', e));
+        navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
+      });
+    }
+  });
+
+  setInterval(() => { $('now').textContent = new Date().toLocaleTimeString('ja-JP'); }, 1000);
+})();
+</script>
 </body>
 </html>
