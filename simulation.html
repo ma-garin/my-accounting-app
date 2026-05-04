@@ -290,7 +290,8 @@
       font-weight: 700;
     }
   </style>
-  <link rel="stylesheet" href="theme.css?v=2.15">
+  <link rel="stylesheet" href="theme.css?v=2.16">
+  <script src="app-core.js?v=2.16"></script>
 </head>
 <body>
 <div class="container">
@@ -300,13 +301,23 @@
   </header>
 
   <div id="updateNotification">
-    新バージョンがあります <button id="updateButton">今すぐ更新</button>
+    v2.16 の更新があります <button id="updateButton">今すぐ更新</button>
   </div>
 
   <!-- 合計金額 -->
   <div class="card" id="sim-total-card">
     <div id="sim-total-label">シミュレーション合計</div>
     <div id="simulation_grand_total">0<span>円</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">テンプレート</div>
+    <div class="template-grid">
+      <button type="button" data-template="light">軽め</button>
+      <button type="button" data-template="normal">通常</button>
+      <button type="button" data-template="long">長時間</button>
+      <button type="button" data-template="champagne">シャンパンあり</button>
+    </div>
   </div>
 
   <!-- 滞在時間 -->
@@ -425,6 +436,16 @@
       <tr><td>消費税 (10%)</td><td id="sim_tax">¥0</td></tr>
       <tr class="total-row"><td>合計金額</td><td id="sim_grand_total_summary">¥0</td></tr>
     </table>
+    <div class="card-actions">
+      <button class="btn btn-save" id="saveSimulationButton">シミュ保存</button>
+      <button class="btn btn-ghost" id="compareHistoryButton">直近履歴と比較</button>
+    </div>
+    <div class="budget-insight" id="sim-compare-result"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">保存済みシミュレーション</div>
+    <div id="saved-simulation-list"><div class="history-empty">保存済みはまだありません</div></div>
   </div>
 </div>
 
@@ -432,43 +453,32 @@
   <a class="bottom-tab" href="index.html">会計</a>
   <button class="bottom-tab tab-current" type="button" disabled>シミュ</button>
   <a class="bottom-tab" href="menu.html">メニュー</a>
+  <a class="bottom-tab" href="settings.html">設定</a>
 </nav>
+
+<div class="sheet-backdrop" id="confirm-sheet" aria-hidden="true">
+  <div class="confirm-sheet-panel">
+    <div class="confirm-title" id="confirm-title">確認</div>
+    <div class="confirm-message" id="confirm-message">実行しますか？</div>
+    <div class="confirm-actions">
+      <button type="button" class="btn btn-ghost" id="confirm-cancel">キャンセル</button>
+      <button type="button" class="btn btn-danger" id="confirm-ok">実行</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function() {
-  const SET_DURATION_MINUTES = 40;
-  const SET_PRICE_A = 2500;
-  const SET_PRICE_B = 3000;
   const MAX_NEW_DRINKS = 5;
-  const SERVICE_CHARGE_RATE = 0.10;
-  const TAX_RATE = 0.10;
-
-  const champagnes = [
-    { id: 'ldc', name: 'LDC シャンパン', price: 20000 },
-    { id: 'ldc_hikari', name: 'LDC 光シャンパン', price: 50000 },
-    { id: 'veuve_y', name: 'ヴーヴ イエロー', price: 26000 },
-    { id: 'veuve_w', name: 'ヴーヴ ホワイト', price: 28000 },
-    { id: 'veuve_r', name: 'ヴーヴ リッチ', price: 37000 },
-    { id: 'lambo_y', name: 'ランボ イエロー', price: 25000 },
-    { id: 'lambo_o', name: 'ランボ オレンジ', price: 45000 },
-    { id: 'lambo_p', name: 'ランボ プラチナ', price: 65000 },
-    { id: 'lambo_l', name: 'ランボ ルミナス', price: 120000 },
-    { id: 'moet_ice', name: 'モエ アイス', price: 30000 },
-    { id: 'moet_rose', name: 'モエ アイスロゼ', price: 35000 },
-    { id: 'armand', name: 'アルマンド ゴールド', price: 150000 },
-    { id: 'soumai', name: 'ソウメイ 白', price: 65000 },
-    { id: 'angel_b', name: 'エンジェル ブラック', price: 120000 },
-    { id: 'angel_w', name: 'エンジェル ホワイト', price: 200000 },
-    { id: 'belle', name: 'ベルエポック 白', price: 80000 },
-    { id: 'diva', name: 'ディーバ ピーチ/ベリー', price: 10000 },
-    { id: 'non_1688', name: 'ノンアル 1688', price: 20000 },
-    { id: 'non_shanmei', name: 'ノンアル シャンメイ', price: 10000 },
-  ];
 
   const $ = id => document.getElementById(id);
+  const activeProfile = AppCore.getActiveProfile();
+  const SET_DURATION_MINUTES = activeProfile.setMinutes || 40;
+  const champagnes = activeProfile.champagnes;
 
-  const prices = { ldrink: 1700, megadrink: 3700, shot: 1500, guestshot: 1000, karaoke: 1000 };
-  const quantities = { ldrink: 0, megadrink: 0, shot: 0, guestshot: 0, karaoke: 0 };
+  const prices = {};
+  const quantities = {};
+  activeProfile.drinks.forEach(d => { prices[d.id] = d.price; quantities[d.id] = 0; });
   const champagneQuantities = {};
   champagnes.forEach(ch => { champagneQuantities[ch.id] = 0; });
 
@@ -476,6 +486,8 @@
   let newDrinkCount = 0;
   let newDrinkIds = [];
   let serviceWorkerNewWorker;
+  let pendingConfirm = null;
+  let lastTotal = 0;
 
   function fmt(num) { return num > 0 ? '¥' + num.toLocaleString() : '—'; }
   function fmtPlain(num) { return '¥' + num.toLocaleString(); }
@@ -527,7 +539,7 @@
     let setTotal = 0;
     if (simulatedTotalMinutes > 0) {
       const sets = Math.ceil(simulatedTotalMinutes / SET_DURATION_MINUTES);
-      setTotal = SET_PRICE_A + Math.max(0, sets - 1) * SET_PRICE_B;
+      setTotal = activeProfile.firstSetPrice + Math.max(0, sets - 1) * activeProfile.extensionSetPrice;
       $('sim_set_count').textContent = sets;
     } else {
       $('sim_set_count').textContent = 0;
@@ -539,10 +551,11 @@
     newDrinkIds.forEach(id => { drinkTotal += (prices[id] || 0) * (quantities[id] || 0); });
 
     const subtotal = setTotal + drinkTotal;
-    const service = Math.floor(subtotal * SERVICE_CHARGE_RATE);
+    const service = Math.floor(subtotal * activeProfile.serviceRate);
     const subtotalWithService = subtotal + service;
-    const tax = Math.floor(subtotalWithService * TAX_RATE);
+    const tax = Math.floor(subtotalWithService * activeProfile.taxRate);
     const finalTotal = Math.round((subtotalWithService + tax) / 100) * 100;
+    lastTotal = finalTotal;
 
     $('simulated_time_display').textContent = formatMinutes(simulatedTotalMinutes);
     $('simulation_grand_total').innerHTML = `${finalTotal.toLocaleString()}<span>円</span>`;
@@ -554,6 +567,7 @@
     $('sim_grand_total_summary').textContent = fmtPlain(finalTotal);
 
     updateChampSim(subtotal, finalTotal);
+    return { total: finalTotal, setTotal, drinkTotal, subtotal, service, tax };
   }
 
   function buildChampSim() {
@@ -575,8 +589,8 @@
   function updateChampSim(currentSubtotal, currentFinalTotal) {
     champagnes.forEach(ch => {
       const newSub   = currentSubtotal + ch.price;
-      const newSvc   = Math.floor(newSub * SERVICE_CHARGE_RATE);
-      const newTax   = Math.floor((newSub + newSvc) * TAX_RATE);
+      const newSvc   = Math.floor(newSub * activeProfile.serviceRate);
+      const newTax   = Math.floor((newSub + newSvc) * activeProfile.taxRate);
       const newTotal = Math.round((newSub + newSvc + newTax) / 100) * 100;
       const diff     = newTotal - currentFinalTotal;
       const tEl = $(`csim-total-${ch.id}`);
@@ -652,16 +666,113 @@
   }
 
   function resetSimulation() {
-    if (!confirm('シミュレーションをリセットしますか？')) return;
-    simulatedTotalMinutes = 0;
-    Object.keys(quantities).forEach(k => { quantities[k] = 0; updateItemDisplay(k); });
-    champagnes.forEach(ch => { champagneQuantities[ch.id] = 0; updateChampagneDisplay(ch.id); });
-    newDrinkIds.forEach(id => { delete prices[id]; delete quantities[id]; });
-    newDrinkIds = [];
-    newDrinkCount = 0;
-    $('newSimDrinkRows').innerHTML = '';
-    buildChampSim();
+    showConfirm('シミュレーションリセット', '時間、数量、カスタムドリンクをリセットします。', () => {
+      simulatedTotalMinutes = 0;
+      Object.keys(quantities).forEach(k => { quantities[k] = 0; updateItemDisplay(k); });
+      champagnes.forEach(ch => { champagneQuantities[ch.id] = 0; updateChampagneDisplay(ch.id); });
+      newDrinkIds.forEach(id => { delete prices[id]; delete quantities[id]; });
+      newDrinkIds = [];
+      newDrinkCount = 0;
+      $('newSimDrinkRows').innerHTML = '';
+      buildChampSim();
+      calculateSimulationTotal();
+    });
+  }
+
+  function showConfirm(title, message, onOk) {
+    pendingConfirm = onOk;
+    $('confirm-title').textContent = title;
+    $('confirm-message').textContent = message;
+    $('confirm-sheet').classList.add('show');
+    $('confirm-sheet').setAttribute('aria-hidden', 'false');
+  }
+
+  function hideConfirm() {
+    pendingConfirm = null;
+    $('confirm-sheet').classList.remove('show');
+    $('confirm-sheet').setAttribute('aria-hidden', 'true');
+  }
+
+  function updateBaseDrinkRows() {
+    activeProfile.drinks.forEach(d => {
+      const priceCell = document.querySelector(`[data-price][id="${d.id}_price"]`) || document.querySelector(`#${d.id}_total`)?.closest('tr')?.querySelector('.price-col');
+      const row = document.querySelector(`#${d.id}_qty`)?.closest('tr');
+      if (row) row.cells[0].textContent = d.name;
+      if (priceCell) priceCell.textContent = `¥${d.price.toLocaleString()}`;
+    });
+  }
+
+  function applyTemplate(name) {
+    resetQuantitiesOnly();
+    const firstChamp = champagnes[0];
+    const templates = {
+      light: { minutes: SET_DURATION_MINUTES, drinks: { ldrink: 1 } },
+      normal: { minutes: SET_DURATION_MINUTES * 2, drinks: { ldrink: 2, shot: 1 } },
+      long: { minutes: SET_DURATION_MINUTES * 4, drinks: { ldrink: 3, megadrink: 1, shot: 2 } },
+      champagne: { minutes: SET_DURATION_MINUTES * 3, drinks: { ldrink: 2 }, champagne: firstChamp ? { [firstChamp.id]: 1 } : {} },
+    };
+    const tpl = templates[name];
+    if (!tpl) return;
+    simulatedTotalMinutes = tpl.minutes;
+    Object.keys(tpl.drinks || {}).forEach(id => { if (id in quantities) quantities[id] = tpl.drinks[id]; });
+    Object.keys(tpl.champagne || {}).forEach(id => { if (id in champagneQuantities) champagneQuantities[id] = tpl.champagne[id]; });
+    Object.keys(quantities).forEach(updateItemDisplay);
+    champagnes.forEach(ch => updateChampagneDisplay(ch.id));
     calculateSimulationTotal();
+  }
+
+  function resetQuantitiesOnly() {
+    Object.keys(quantities).forEach(k => { quantities[k] = 0; updateItemDisplay(k); });
+    Object.keys(champagneQuantities).forEach(k => { champagneQuantities[k] = 0; updateChampagneDisplay(k); });
+  }
+
+  function saveSimulation() {
+    const bill = calculateSimulationTotal();
+    const saved = AppCore.read(AppCore.KEYS.simulations, []);
+    saved.push({
+      id: `sim_${Date.now()}`,
+      timestamp: Date.now(),
+      profileSnapshot: AppCore.snapshotProfile(activeProfile),
+      minutes: simulatedTotalMinutes,
+      quantities: AppCore.clone(quantities),
+      champagneQuantities: AppCore.clone(champagneQuantities),
+      total: bill.total,
+    });
+    AppCore.write(AppCore.KEYS.simulations, saved.slice(-30));
+    renderSavedSimulations();
+  }
+
+  function renderSavedSimulations() {
+    const saved = AppCore.read(AppCore.KEYS.simulations, []);
+    const list = $('saved-simulation-list');
+    if (!saved.length) {
+      list.innerHTML = '<div class="history-empty">保存済みはまだありません</div>';
+      return;
+    }
+    list.innerHTML = saved.slice().reverse().map(s => {
+      const d = new Date(s.timestamp).toLocaleString('ja-JP');
+      return `<div class="history-item"><div class="history-item-header"><div class="history-item-date">${d}</div><div class="history-item-total">¥${s.total.toLocaleString()}</div></div><div class="history-item-detail">${s.profileSnapshot?.name || ''} / ${formatMinutes(s.minutes)}</div></div>`;
+    }).join('');
+  }
+
+  function compareLatestHistory() {
+    const hist = AppCore.migrateHistory();
+    if (!hist.length) {
+      $('sim-compare-result').textContent = '比較できる会計履歴がありません';
+      return;
+    }
+    const last = hist[hist.length - 1];
+    const diff = lastTotal - (last.actualTotal || last.total);
+    $('sim-compare-result').textContent = `直近実会計との差額: ${diff === 0 ? '±0' : (diff > 0 ? '+' : '') + '¥' + diff.toLocaleString()}`;
+  }
+
+  function applyHistorySeed() {
+    const seed = AppCore.read('simulation_seed', null);
+    if (!seed) return;
+    simulatedTotalMinutes = (seed.sets || 0) * SET_DURATION_MINUTES;
+    Object.assign(quantities, seed.session?.drinkQty || {});
+    Object.keys(quantities).forEach(updateItemDisplay);
+    localStorage.removeItem('simulation_seed');
   }
 
   function showUpdateBar() {
@@ -674,15 +785,30 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    updateBaseDrinkRows();
     renderChampagneTable();
     buildChampSim();
+    applyHistorySeed();
     calculateSimulationTotal();
+    renderSavedSimulations();
 
     $('add_40_min_button').addEventListener('click', () => { simulatedTotalMinutes += SET_DURATION_MINUTES; calculateSimulationTotal(); });
     $('subtract_40_min_button').addEventListener('click', () => { simulatedTotalMinutes = Math.max(0, simulatedTotalMinutes - SET_DURATION_MINUTES); calculateSimulationTotal(); });
     $('reset_time_button').addEventListener('click', () => { simulatedTotalMinutes = 0; calculateSimulationTotal(); });
     $('resetSimulationButton').addEventListener('click', resetSimulation);
     $('addNewSimDrinkRowButton').addEventListener('click', addNewSimDrinkRow);
+    $('saveSimulationButton').addEventListener('click', saveSimulation);
+    $('compareHistoryButton').addEventListener('click', compareLatestHistory);
+    $('confirm-cancel').addEventListener('click', hideConfirm);
+    $('confirm-ok').addEventListener('click', () => {
+      const fn = pendingConfirm;
+      hideConfirm();
+      if (fn) fn();
+    });
+    $('confirm-sheet').addEventListener('click', e => { if (e.target.id === 'confirm-sheet') hideConfirm(); });
+    document.querySelectorAll('[data-template]').forEach(btn => {
+      btn.addEventListener('click', () => applyTemplate(btn.dataset.template));
+    });
 
     // イベント委譲
     $('simulationDrinkTable').addEventListener('click', e => {
@@ -698,7 +824,7 @@
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js?v=2.15', { updateViaCache: 'none' })
+        navigator.serviceWorker.register('./service-worker.js?v=2.16', { updateViaCache: 'none' })
           .then(reg => {
             reg.update();
             reg.addEventListener('updatefound', () => {

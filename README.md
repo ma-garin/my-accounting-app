@@ -1,57 +1,48 @@
-# マイ会計・時間管理 (my-accounting-app)
+# マイ会計・時間管理
 
-時間管理と会計計算をまとめて行える、シンプルなPWA対応Webアプリです。  
-`index.html`（会計・時間管理）、`simulation.html`（金額シミュレーション）、`menu.html`（メニュー確認）で構成されています。
+ガールズバー来店中の時間、会計見込み、予算、履歴を端末内だけで管理する静的PWAです。保存はすべて `localStorage` のみで、外部送信やクラウド同期は行いません。
 
 ## 主な機能
 
-- 40分セット単位の時間管理（開始・一時停止・終了・リセット）
-- ドリンク数量の加減算とリアルタイム合計表示
-- サービス料10%・消費税10%を含む会計サマリー計算
-- シミュレーション画面での滞在時間・ドリンク・シャンパン試算
-- カスタムドリンク追加（最大5件）
-- Service Worker + Manifest によるオフライン/PWA対応
+- ラウンジダークUIとスマホ向け下部固定操作
+- タイマー、セット数、次セット残り時間の自動計算
+- クイック追加バー（L +1 / メガ +1 / SHOT +1）とUndo
+- 店舗別料金プロファイル（セット料金、料率、ドリンク、シャンパン）
+- 予算残り、予算80%超過、予算超過、退店制約の状態表示
+- 会計履歴、実請求額、キャストメモ、料金スナップショット保存
+- シミュレーションテンプレート、保存済みシミュレーション、履歴転用
+- メニュー検索、価格帯フィルタ、カテゴリ折りたたみ、シャンパン総額ミニシミュ
+- Service Worker + Manifest によるPWA対応
 
 ## 画面
 
 - `index.html`: 会計・時間管理のメイン画面
 - `simulation.html`: 金額シミュレーション画面
-- `menu.html`: ドリンク/シャンパンのメニュー表示
+- `menu.html`: メニュー検索・価格確認画面
+- `settings.html`: 店舗別料金設定画面
 
 ## ローカルでの使い方
 
-ビルド不要の静的サイトです。ブラウザで `index.html` を開くだけでも動作します。  
-Service Worker を正しく動かす場合は、ローカルサーバー経由で起動してください。
-
-### 例: Pythonで起動
+ビルド不要の静的サイトです。Service Worker を正しく動かす場合は、ローカルサーバー経由で起動してください。
 
 ```bash
-cd /Users/fujimagariyuki/Desktop/app/002/my-accounting-app
-python3 -m http.server 8080
+python3 -m http.server 8123
 ```
 
-ブラウザで `http://localhost:8080/index.html` を開きます。
+ブラウザで `http://127.0.0.1:8123/index.html` を開きます。
 
 ## ファイル構成
 
 ```text
 .
+├─ app-core.js
 ├─ index.html
 ├─ simulation.html
 ├─ menu.html
+├─ settings.html
+├─ theme.css
 ├─ manifest.json
 ├─ service-worker.js
+├─ docs/
 └─ icons/
 ```
-
-## GitHubにREADMEを反映する手順
-
-このリポジトリには `origin` が設定済みです。
-
-```bash
-git add README.md
-git commit -m "Add README"
-git push origin main
-```
-
-`main` 以外のブランチ運用をしている場合は、最後のコマンドのブランチ名を置き換えてください。

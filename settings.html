@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>店舗設定</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css?v=2.16">
+  <script src="app-core.js?v=2.16"></script>
+  <style>
+    body { padding-bottom: 96px; }
+    .settings-form { display: grid; gap: 10px; }
+    .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .settings-form label { color: var(--text-2); font-size: 0.76rem; font-weight: 700; }
+    .editable-list { display: grid; gap: 8px; }
+    .editable-row { display: grid; grid-template-columns: 1fr 110px; gap: 8px; align-items: end; }
+    .editable-row label { min-width: 0; }
+    .editable-row input { width: 100%; min-width: 0; }
+    .revision-list { display: grid; gap: 8px; max-height: 220px; overflow: auto; }
+    .revision-item { padding: 10px; border-radius: var(--r-sm); background: var(--surface-hi); color: var(--text-2); font-size: 0.82rem; }
+    .save-note { color: var(--success); font-size: 0.86rem; min-height: 1.4em; }
+    @media (max-width: 380px) {
+      .settings-grid,
+      .editable-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>店舗設定</h1>
+    <div class="subtitle">Store Profile</div>
+  </header>
+
+  <div id="updateNotification">
+    v2.16 の更新があります <button id="updateButton">今すぐ更新</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">店舗プロファイル</div>
+    <div class="settings-form">
+      <label>使用中の店舗<select id="profile-select"></select></label>
+      <div class="card-actions">
+        <button class="btn btn-primary" id="new-profile" type="button">店舗を複製</button>
+        <button class="btn btn-ghost" id="set-active" type="button">この店舗を使う</button>
+      </div>
+      <div class="save-note" id="save-note"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">基本料金</div>
+    <div class="settings-form">
+      <label>店舗名<input id="profile-name" type="text"></label>
+      <div class="settings-grid">
+        <label>セット時間(分)<input id="set-minutes" type="number" min="1" step="1"></label>
+        <label>初回セット<input id="first-set" type="number" min="0" step="100"></label>
+        <label>延長セット<input id="extension-set" type="number" min="0" step="100"></label>
+        <label>サービス料(%)<input id="service-rate" type="number" min="0" step="1"></label>
+        <label>税率(%)<input id="tax-rate" type="number" min="0" step="1"></label>
+      </div>
+      <button class="btn btn-save" id="save-profile" type="button">料金を保存</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ドリンク価格</div>
+    <div class="editable-list" id="drink-list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">シャンパン価格</div>
+    <div class="editable-list" id="champagne-list"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">料金変更履歴</div>
+    <div class="revision-list" id="revision-list"></div>
+  </div>
+</div>
+
+<nav class="bottom-tabs" aria-label="画面切り替え">
+  <a class="bottom-tab" href="index.html">会計</a>
+  <a class="bottom-tab" href="simulation.html">シミュ</a>
+  <a class="bottom-tab" href="menu.html">メニュー</a>
+  <button class="bottom-tab tab-current" type="button" disabled>設定</button>
+</nav>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  let profiles = AppCore.getProfiles();
+  let current = AppCore.getActiveProfile();
+  let swNewWorker;
+
+  function showNote(text) {
+    $('save-note').textContent = text;
+    setTimeout(() => { $('save-note').textContent = ''; }, 1800);
+  }
+
+  function renderSelect() {
+    $('profile-select').innerHTML = profiles.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    $('profile-select').value = current.id;
+  }
+
+  function rowHtml(kind, item) {
+    return `
+      <div class="editable-row" data-kind="${kind}" data-id="${item.id}">
+        <label>名前<input class="item-name" type="text" value="${item.name || ''}"></label>
+        <label>価格<input class="item-price" type="number" min="0" step="100" value="${item.price || 0}"></label>
+      </div>`;
+  }
+
+  function renderForm() {
+    $('profile-name').value = current.name || '';
+    $('set-minutes').value = current.setMinutes || 40;
+    $('first-set').value = current.firstSetPrice || 0;
+    $('extension-set').value = current.extensionSetPrice || 0;
+    $('service-rate').value = Math.round((current.serviceRate || 0) * 100);
+    $('tax-rate').value = Math.round((current.taxRate || 0) * 100);
+    $('drink-list').innerHTML = current.drinks.map(item => rowHtml('drink', item)).join('');
+    $('champagne-list').innerHTML = current.champagnes.map(item => rowHtml('champagne', item)).join('');
+    const revisions = current.revisions || [];
+    $('revision-list').innerHTML = revisions.length
+      ? revisions.slice().reverse().map(r => `<div class="revision-item">${new Date(r.at).toLocaleString('ja-JP')} / ${r.summary}</div>`).join('')
+      : '<div class="revision-item">変更履歴はまだありません</div>';
+  }
+
+  function collectProfile() {
+    const next = AppCore.clone(current);
+    next.name = $('profile-name').value.trim() || '未設定店舗';
+    next.setMinutes = parseInt($('set-minutes').value) || 40;
+    next.firstSetPrice = parseInt($('first-set').value) || 0;
+    next.extensionSetPrice = parseInt($('extension-set').value) || 0;
+    next.serviceRate = (parseInt($('service-rate').value) || 0) / 100;
+    next.taxRate = (parseInt($('tax-rate').value) || 0) / 100;
+    document.querySelectorAll('.editable-row').forEach(row => {
+      const list = row.dataset.kind === 'drink' ? next.drinks : next.champagnes;
+      const item = list.find(x => x.id === row.dataset.id);
+      if (item) {
+        item.name = row.querySelector('.item-name').value.trim() || item.name;
+        item.price = parseInt(row.querySelector('.item-price').value) || 0;
+      }
+    });
+    next.updatedAt = Date.now();
+    next.revisions = Array.isArray(next.revisions) ? next.revisions : [];
+    next.revisions.push({ at: Date.now(), summary: '料金設定を保存' });
+    next.revisions = next.revisions.slice(-20);
+    return next;
+  }
+
+  function saveProfile() {
+    const next = collectProfile();
+    profiles = profiles.map(p => p.id === next.id ? next : p);
+    current = next;
+    AppCore.saveProfiles(profiles);
+    AppCore.setActiveProfile(next.id);
+    renderSelect();
+    renderForm();
+    showNote('保存しました');
+  }
+
+  function showUpdateBar() {
+    const n = $('updateNotification');
+    if (n) n.style.display = 'block';
+    const b = $('updateButton');
+    if (b) b.addEventListener('click', () => { if (swNewWorker) swNewWorker.postMessage({ action: 'skipWaiting' }); });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderSelect();
+    renderForm();
+    $('profile-select').addEventListener('change', e => {
+      current = profiles.find(p => p.id === e.target.value) || profiles[0];
+      renderForm();
+    });
+    $('set-active').addEventListener('click', () => {
+      AppCore.setActiveProfile(current.id);
+      showNote('この店舗を使用します');
+    });
+    $('new-profile').addEventListener('click', () => {
+      const copy = AppCore.clone(current);
+      copy.id = `store_${Date.now()}`;
+      copy.name = `${copy.name} コピー`;
+      copy.revisions = [{ at: Date.now(), summary: '店舗を複製' }];
+      profiles.push(copy);
+      current = copy;
+      AppCore.saveProfiles(profiles);
+      renderSelect();
+      renderForm();
+    });
+    $('save-profile').addEventListener('click', saveProfile);
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js?v=2.16', { updateViaCache: 'none' })
+          .then(reg => {
+            reg.update();
+            reg.addEventListener('updatefound', () => {
+              swNewWorker = reg.installing;
+              swNewWorker.addEventListener('statechange', () => {
+                if (swNewWorker.state === 'installed' && navigator.serviceWorker.controller) showUpdateBar();
+              });
+            });
+          }).catch(e => console.log('SW:', e));
+        navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
+      });
+    }
+  });
+})();
+</script>
+</body>
+</html>
