@@ -1,26 +1,26 @@
 :root {
-  --bg: #101418;
-  --surface: #181c20;
-  --surface-hi: #20252b;
-  --primary: #9fcaff;
-  --primary-on: #003258;
-  --primary-cont: #173b57;
-  --primary-txt: #d1e8ff;
-  --primary-dim: rgba(159, 202, 255, 0.13);
-  --secondary: #79d0c4;
-  --error: #ffb4ab;
-  --error-cont: rgba(255, 180, 171, 0.13);
-  --success: #8ddaa0;
-  --warning: #ffd98f;
-  --text-1: #e4e9ef;
-  --text-2: #a8b2bf;
-  --text-3: #6f7986;
-  --divider: rgba(228, 233, 239, 0.09);
-  --outline: rgba(228, 233, 239, 0.15);
-  --radius: 8px;
+  --bg: #eceff1;
+  --surface: #ffffff;
+  --surface-hi: #f5f7f8;
+  --primary: #37474f;
+  --primary-on: #ffffff;
+  --primary-cont: #37474f;
+  --primary-txt: #ffffff;
+  --primary-dim: rgba(55, 71, 79, 0.08);
+  --secondary: #546e7a;
+  --error: #b71c1c;
+  --error-cont: rgba(183, 28, 28, 0.08);
+  --success: #2e7d32;
+  --warning: #b26a00;
+  --text-1: #263238;
+  --text-2: #546e7a;
+  --text-3: #78909c;
+  --divider: rgba(38, 50, 56, 0.12);
+  --outline: rgba(38, 50, 56, 0.22);
+  --radius: 10px;
   --r: var(--radius);
-  --r-sm: 6px;
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.34), 0 2px 8px rgba(0, 0, 0, 0.22);
+  --r-sm: 8px;
+  --shadow-1: 0 1px 4px rgba(0, 0, 0, 0.08);
   --font: 'Noto Sans JP', sans-serif;
   --accent-orange: var(--warning);
   --accent-green: var(--success);
@@ -76,7 +76,7 @@ header h2 {
 
 header .subtitle {
   margin-top: 4px;
-  color: var(--text-2);
+  color: var(--secondary);
   font-size: 0.72rem;
   letter-spacing: 0.12em;
 }
@@ -86,7 +86,7 @@ header .subtitle {
   width: 100%;
   margin-bottom: 12px;
   padding: 16px;
-  border: 1px solid rgba(228, 233, 239, 0.04);
+  border: 1px solid rgba(38, 50, 56, 0.06);
   border-radius: var(--radius);
   background: var(--surface);
   box-shadow: var(--shadow-1);
@@ -100,7 +100,7 @@ header .subtitle {
   margin: 0 0 14px;
   padding: 0;
   background: transparent;
-  color: var(--text-2);
+  color: var(--secondary);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -140,12 +140,12 @@ header .subtitle {
 
 .btn-ghost {
   border: 1px solid var(--outline);
-  background: var(--surface-hi);
+  background: var(--surface);
   color: var(--text-1);
 }
 
 .btn-danger {
-  border: 1px solid rgba(255, 180, 171, 0.36);
+  border: 1px solid rgba(183, 28, 28, 0.24);
   background: var(--error-cont);
   color: var(--error);
 }
@@ -157,16 +157,64 @@ header .subtitle {
   opacity: 0.9;
 }
 
-.nav-current,
-.nav-current:hover {
-  border: 1px solid rgba(159, 202, 255, 0.45);
-  background: var(--primary-dim);
-  color: var(--primary);
-  opacity: 1;
-  cursor: default;
+.card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--divider);
 }
 
-.nav-current:disabled {
+.card-actions .btn:only-child {
+  grid-column: 1 / -1;
+}
+
+.bottom-tabs {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  width: min(100%, 500px);
+  margin: 0 auto;
+  padding: 6px 8px max(6px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--divider);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.bottom-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--secondary);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.bottom-tab:hover {
+  background: var(--primary-dim);
+  color: var(--primary);
+}
+
+.tab-current,
+.tab-current:hover,
+.tab-current:disabled {
+  background: var(--primary-dim);
+  color: var(--primary);
+  cursor: default;
+  opacity: 1;
   -webkit-text-fill-color: var(--primary);
 }
 
@@ -175,12 +223,13 @@ header .subtitle {
   width: 100%;
   margin: 0 0 12px;
   padding: 10px 14px;
-  border: 1px solid rgba(159, 202, 255, 0.34);
+  border: 1px solid rgba(55, 71, 79, 0.18);
   border-radius: var(--r-sm);
-  background: var(--primary-dim);
+  background: var(--surface);
   color: var(--primary);
   text-align: center;
   font-size: 0.82rem;
+  box-shadow: var(--shadow-1);
 }
 
 #updateButton {
@@ -191,32 +240,18 @@ header .subtitle {
   font-size: 0.8rem;
 }
 
-.fixed-bottom-bar {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  transform: none;
-  z-index: 1000;
-  display: flex;
-  gap: 6px;
-  width: min(100%, 500px);
-  margin: 0 auto;
-  padding: 10px 12px max(10px, env(safe-area-inset-bottom));
-  border-top: 1px solid var(--divider);
-  background: rgba(24, 28, 32, 0.97);
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(12px);
+.menu-content {
+  margin-top: 0;
 }
 
-.fixed-bottom-bar .btn {
-  flex: 1 1 0;
-  min-width: 0;
-  min-height: 40px;
-  padding: 10px 4px;
-  border-radius: var(--r-sm);
-  font-size: 0.78rem;
-  white-space: nowrap;
+.menu-list li {
+  border-bottom-color: var(--divider);
+}
+
+@media (max-width: 380px) {
+  .card-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (min-width: 600px) {

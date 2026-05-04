@@ -266,24 +266,6 @@
     .summary-table td:last-child { text-align: right; font-weight: 700; }
     .summary-table .total-row td { padding-top: 12px; font-size: 1rem; color: var(--primary); }
 
-    /* 下部固定バー */
-    .fixed-bottom-bar {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 500px;
-      background: rgba(28,31,39,0.97);
-      backdrop-filter: blur(12px);
-      border-top: 1px solid var(--divider);
-      padding: 10px 12px;
-      display: flex;
-      gap: 8px;
-      z-index: 1000;
-    }
-    .fixed-bottom-bar .btn { flex: 1; font-size: 0.8rem; padding: 10px 4px; }
-
     /* PWA更新通知 */
     #updateNotification {
       display: none;
@@ -308,7 +290,7 @@
       font-weight: 700;
     }
   </style>
-  <link rel="stylesheet" href="theme.css?v=2.14">
+  <link rel="stylesheet" href="theme.css?v=2.15">
 </head>
 <body>
 <div class="container">
@@ -340,6 +322,9 @@
     <div class="set-info">
       <span class="set-info-label">セット数</span>
       <span class="set-badge" id="sim_set_count">0</span>
+    </div>
+    <div class="card-actions">
+      <button class="btn btn-danger" id="resetSimulationButton">シミュレーションをリセット</button>
     </div>
   </div>
 
@@ -443,13 +428,11 @@
   </div>
 </div>
 
-<!-- 下部バー -->
-<div class="fixed-bottom-bar">
-  <button class="btn btn-danger" id="resetSimulationButton">リセット</button>
-  <button class="btn btn-ghost" onclick="window.location.href='index.html'">会計画面</button>
-  <button class="btn nav-current" disabled>シミュ</button>
-  <button class="btn btn-ghost" onclick="window.location.href='menu.html'">メニュー</button>
-</div>
+<nav class="bottom-tabs" aria-label="画面切り替え">
+  <a class="bottom-tab" href="index.html">会計</a>
+  <button class="bottom-tab tab-current" type="button" disabled>シミュ</button>
+  <a class="bottom-tab" href="menu.html">メニュー</a>
+</nav>
 
 <script>
 (function() {
@@ -715,7 +698,7 @@
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js?v=2.14', { updateViaCache: 'none' })
+        navigator.serviceWorker.register('./service-worker.js?v=2.15', { updateViaCache: 'none' })
           .then(reg => {
             reg.update();
             reg.addEventListener('updatefound', () => {

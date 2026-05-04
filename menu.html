@@ -150,7 +150,7 @@
       .container, .menu-content { padding: 24px; }
     }
   </style>
-  <link rel="stylesheet" href="theme.css?v=2.14">
+  <link rel="stylesheet" href="theme.css?v=2.15">
 </head>
 <body>
   <div class="container">
@@ -161,16 +161,6 @@
 
     <div id="updateNotification">
       新バージョンがあります <button id="updateButton">今すぐ更新</button>
-    </div>
-
-    <div class="card">
-      <div class="card-title">画面移動</div>
-      <div class="menu-item">
-        <a href="index.html">会計・時間管理</a>
-      </div>
-      <div class="menu-item">
-        <a href="simulation.html">金額シミュレーション</a>
-      </div>
     </div>
 
   <div class="menu-content card">
@@ -213,11 +203,11 @@
   </div>
 </div>
 
-  <div class="fixed-bottom-bar">
-    <button class="btn btn-ghost" onclick="window.location.href='index.html'">会計</button>
-    <button class="btn btn-ghost" onclick="window.location.href='simulation.html'">シミュ</button>
-    <button class="btn nav-current" disabled>メニュー</button>
-  </div>
+  <nav class="bottom-tabs" aria-label="画面切り替え">
+    <a class="bottom-tab" href="index.html">会計</a>
+    <a class="bottom-tab" href="simulation.html">シミュ</a>
+    <button class="bottom-tab tab-current" type="button" disabled>メニュー</button>
+  </nav>
 
   <script>
     // Service Workerの更新通知と処理 (index.htmlと共通)
@@ -240,7 +230,7 @@
     // Service Workerの登録部分にイベントリスナーを追加 (index.htmlと共通)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js?v=2.14', { updateViaCache: 'none' })
+        navigator.serviceWorker.register('./service-worker.js?v=2.15', { updateViaCache: 'none' })
           .then(reg => {
             console.log('ServiceWorker registration successful with scope: ', reg.scope);
             reg.update();
