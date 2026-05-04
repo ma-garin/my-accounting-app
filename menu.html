@@ -150,7 +150,8 @@
       .container, .menu-content { padding: 24px; }
     }
   </style>
-  <link rel="stylesheet" href="theme.css?v=2.15">
+  <link rel="stylesheet" href="theme.css?v=2.16">
+  <script src="app-core.js?v=2.16"></script>
 </head>
 <body>
   <div class="container">
@@ -160,45 +161,34 @@
     </header>
 
     <div id="updateNotification">
-      新バージョンがあります <button id="updateButton">今すぐ更新</button>
+      v2.16 の更新があります <button id="updateButton">今すぐ更新</button>
     </div>
 
   <div class="menu-content card">
     <div class="menu-category">
-      <h3>ドリンク</h3>
-      <ul class="menu-list">
-        <li><span class="menu-item-name">Lドリンク</span><span class="menu-item-price">¥1,700</span></li>
-        <li><span class="menu-item-name">メガドリンク</span><span class="menu-item-price">¥3,700</span></li>
-        <li><span class="menu-item-name">SHOT</span><span class="menu-item-price">¥1,500</span></li>
-        <li><span class="menu-item-name">ゲストSHOT</span><span class="menu-item-price">¥1,000</span></li>
-        <li><span class="menu-item-name">カラオケ5曲</span><span class="menu-item-price">¥1,000</span></li>
-      </ul>
+      <h3>検索</h3>
+      <input id="menu-search" class="filter-input" type="search" placeholder="メニュー検索">
+      <div class="price-filter-row" id="price-filter-row" style="margin-top:10px;">
+        <button type="button" class="active" data-max="all">すべて</button>
+        <button type="button" data-max="3000">〜3千</button>
+        <button type="button" data-max="50000">〜5万</button>
+        <button type="button" data-max="999999">高額</button>
+      </div>
+    </div>
+
+    <div class="menu-category" data-category="drinks">
+      <button class="category-toggle" type="button" data-toggle="drink-list">ドリンク</button>
+      <ul class="menu-list" id="drink-list"></ul>
+    </div>
+
+    <div class="menu-category" data-category="champagnes">
+      <button class="category-toggle" type="button" data-toggle="champagne-list">シャンパン</button>
+      <ul class="menu-list" id="champagne-list"></ul>
     </div>
 
     <div class="menu-category">
-      <h3>シャンパン</h3>
-      <ul class="menu-list">
-        <li><span class="menu-item-name">LDC LDCシャンパン</span><span class="menu-item-price">¥20,000</span></li>
-        <li><span class="menu-item-name">LDC LDC光シャンパン</span><span class="menu-item-price">¥50,000</span></li>
-        <li><span class="menu-item-name">ヴーヴクリコ イエロー</span><span class="menu-item-price">¥26,000</span></li>
-        <li><span class="menu-item-name">ヴーヴクリコ ホワイト</span><span class="menu-item-price">¥28,000</span></li>
-        <li><span class="menu-item-name">ヴーヴクリコ リッチ</span><span class="menu-item-price">¥37,000</span></li>
-        <li><span class="menu-item-name">ヴーヴクリコ リッチゼロ</span><span class="menu-item-price">¥40,000</span></li>
-        <li><span class="menu-item-name">ランボルギーニ イエロー</span><span class="menu-item-price">¥25,000</span></li>
-        <li><span class="menu-item-name">ランボルギーニ オレンジ</span><span class="menu-item-price">¥45,000</span></li>
-        <li><span class="menu-item-name">ランボルギーニ プラチナ</span><span class="menu-item-price">¥65,000</span></li>
-        <li><span class="menu-item-name">ランボルギーニ ルミナス</span><span class="menu-item-price">¥120,000</span></li>
-        <li><span class="menu-item-name">モエシャンドン アイス</span><span class="menu-item-price">¥30,000</span></li>
-        <li><span class="menu-item-name">モエシャンドン アイスロゼ</span><span class="menu-item-price">¥35,000</span></li>
-        <li><span class="menu-item-name">アルマンド ゴールド</span><span class="menu-item-price">¥150,000</span></li>
-        <li><span class="menu-item-name">ソウメイ 白</span><span class="menu-item-price">¥65,000</span></li>
-        <li><span class="menu-item-name">エンジェル ブラック</span><span class="menu-item-price">¥120,000</span></li>
-        <li><span class="menu-item-name">エンジェル ホワイト</span><span class="menu-item-price">¥200,000</span></li>
-        <li><span class="menu-item-name">ペリエジュエベルエポック 白</span><span class="menu-item-price">¥80,000</span></li>
-        <li><span class="menu-item-name">ディーバ ピーチ／ベリー</span><span class="menu-item-price">¥10,000</span></li>
-        <li><span class="menu-item-name">ノンアルコール 1688</span><span class="menu-item-price">¥20,000</span></li>
-        <li><span class="menu-item-name">ノンアルコール シャンメイ</span><span class="menu-item-price">¥10,000</span></li>
-      </ul>
+      <h3>シャンパン総額</h3>
+      <div class="budget-insight" id="champagne-mini-sim">シャンパンを選ぶと概算総額を表示します</div>
     </div>
   </div>
 </div>
@@ -207,9 +197,82 @@
     <a class="bottom-tab" href="index.html">会計</a>
     <a class="bottom-tab" href="simulation.html">シミュ</a>
     <button class="bottom-tab tab-current" type="button" disabled>メニュー</button>
+    <a class="bottom-tab" href="settings.html">設定</a>
   </nav>
 
   <script>
+    const profile = AppCore.getActiveProfile();
+    let currentFilter = 'all';
+
+    function yen(n) { return '¥' + Number(n || 0).toLocaleString(); }
+
+    function currentBaseTotal() {
+      const session = AppCore.loadSession();
+      if (!session) return 0;
+      const bill = AppCore.calculateBill(profile, session.timer?.setCount || 0, session.drinkQty || {}, session.customDefs || {}, {});
+      return bill.total;
+    }
+
+    function passesFilter(item) {
+      const query = document.getElementById('menu-search').value.trim().toLowerCase();
+      const matchQuery = !query || item.name.toLowerCase().includes(query);
+      const max = currentFilter === 'all' ? Infinity : Number(currentFilter);
+      const matchPrice = currentFilter === '999999' ? item.price > 50000 : item.price <= max;
+      return matchQuery && matchPrice;
+    }
+
+    function renderList(listId, items, champagne) {
+      const ul = document.getElementById(listId);
+      const rows = items.filter(passesFilter);
+      ul.innerHTML = rows.length ? rows.map(item => `
+        <li data-price="${item.price}" data-name="${item.name}">
+          <span>
+            <span class="menu-item-name">${item.name}</span>
+            <span class="menu-note">${item.note || 'メモなし'}</span>
+          </span>
+          <button type="button" class="menu-item-price" data-champagne="${champagne ? item.id : ''}">${yen(item.price)}</button>
+        </li>
+      `).join('') : '<li><span class="menu-item-name">該当なし</span><span class="menu-item-price">—</span></li>';
+    }
+
+    function renderMenus() {
+      renderList('drink-list', profile.drinks, false);
+      renderList('champagne-list', profile.champagnes, true);
+    }
+
+    function showChampagneTotal(id) {
+      const ch = profile.champagnes.find(item => item.id === id);
+      if (!ch) return;
+      const base = currentBaseTotal();
+      const subtotal = ch.price;
+      const service = Math.floor(subtotal * profile.serviceRate);
+      const tax = Math.floor((subtotal + service) * profile.taxRate);
+      const add = Math.round((subtotal + service + tax) / 100) * 100;
+      document.getElementById('champagne-mini-sim').textContent = `${ch.name}を入れると、現在会計から概算 ${yen(base + add)}（追加 ${yen(add)}）`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderMenus();
+      document.getElementById('menu-search').addEventListener('input', renderMenus);
+      document.getElementById('price-filter-row').addEventListener('click', e => {
+        const btn = e.target.closest('button[data-max]');
+        if (!btn) return;
+        currentFilter = btn.dataset.max;
+        document.querySelectorAll('#price-filter-row button').forEach(b => b.classList.toggle('active', b === btn));
+        renderMenus();
+      });
+      document.querySelectorAll('.category-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const list = document.getElementById(btn.dataset.toggle);
+          list.hidden = !list.hidden;
+        });
+      });
+      document.getElementById('champagne-list').addEventListener('click', e => {
+        const btn = e.target.closest('[data-champagne]');
+        if (btn && btn.dataset.champagne) showChampagneTotal(btn.dataset.champagne);
+      });
+    });
+
     // Service Workerの更新通知と処理 (index.htmlと共通)
     let serviceWorkerNewWorker; // Service Workerの新しいインスタンスを保持
 
@@ -230,7 +293,7 @@
     // Service Workerの登録部分にイベントリスナーを追加 (index.htmlと共通)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js?v=2.15', { updateViaCache: 'none' })
+        navigator.serviceWorker.register('./service-worker.js?v=2.16', { updateViaCache: 'none' })
           .then(reg => {
             console.log('ServiceWorker registration successful with scope: ', reg.scope);
             reg.update();

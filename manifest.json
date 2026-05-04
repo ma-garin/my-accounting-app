@@ -4,8 +4,8 @@
   "description": "時間管理と会計計算を行うウェブアプリ",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0056b3",
+  "background_color": "#0c0d10",
+  "theme_color": "#17181d",
   "icons": [
     {
       "src": "icons/icon-192x192.png",

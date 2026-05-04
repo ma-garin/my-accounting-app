@@ -1,7 +1,7 @@
 // キャッシュのバージョン名を定義します。
 // アプリを更新するたびにこのバージョン名を変更することで、
 // Service Workerが新しいキャッシュをダウンロードするようにトリガーします。
-const CACHE_NAME = 'my-accounting-app-v2.15'; // ライトテーマと3タブ化に合わせて更新
+const CACHE_NAME = 'my-accounting-app-v2.16'; // ラウンジダークと店舗別料金に合わせて更新
 
 // キャッシュするファイルの一覧を定義します。
 // ここに記載されたファイルは、初回アクセス時にキャッシュされます。
@@ -9,13 +9,15 @@ const urlsToCache = [
   '/', // トップページ
   'index.html', // メインのHTMLファイル (会計画面)
   'simulation.html', // シミュレーション画面
-  'theme.css?v=2.15', // 共通テーマ
+  'menu.html', // メニュー画面
+  'settings.html', // 店舗設定画面
+  'app-core.js?v=2.16', // 共通データ・料金ロジック
+  'theme.css?v=2.16', // 共通テーマ
   'manifest.json', // PWAの設定ファイル
   'service-worker.js', // このService Worker自身もキャッシュ
   // アイコンファイルは、正しくパスが指定されているか確認してください
   'icons/icon-192x192.png',
-  'icons/icon-512x512.png',
-  'menu.html' // メニュー画面もキャッシュ対象に追加
+  'icons/icon-512x512.png'
 ];
 
 // インストールイベント: Service Workerがインストールされたときに実行されます。
