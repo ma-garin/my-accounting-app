@@ -1,7 +1,7 @@
 // キャッシュのバージョン名を定義します。
 // アプリを更新するたびにこのバージョン名を変更することで、
 // Service Workerが新しいキャッシュをダウンロードするようにトリガーします。
-const CACHE_NAME = 'my-accounting-app-v2.13'; // バージョンを v2.13 に更新しました
+const CACHE_NAME = 'my-accounting-app-v2.14'; // デザイン共通化に合わせて v2.14 に更新しました
 
 // キャッシュするファイルの一覧を定義します。
 // ここに記載されたファイルは、初回アクセス時にキャッシュされます。
@@ -9,6 +9,7 @@ const urlsToCache = [
   '/', // トップページ
   'index.html', // メインのHTMLファイル (会計画面)
   'simulation.html', // シミュレーション画面
+  'theme.css?v=2.14', // 共通テーマ
   'manifest.json', // PWAの設定ファイル
   'service-worker.js', // このService Worker自身もキャッシュ
   // アイコンファイルは、正しくパスが指定されているか確認してください

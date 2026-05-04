@@ -5,26 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>メニュー画面</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192x192.png">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --bg: #111318;
-      --surface: #1c1f27;
-      --surface-hi: #262b36;
-      --primary: #82aacc;
-      --primary-on: #002845;
-      --text-1: #e2e5f0;
-      --text-2: #9aa3b5;
-      --divider: rgba(255,255,255,0.08);
-      --radius: 8px;
-      --font: 'Noto Sans JP', 'Helvetica Neue', sans-serif;
-    }
-
     * { box-sizing: border-box; }
 
     body {
@@ -163,25 +150,30 @@
       .container, .menu-content { padding: 24px; }
     }
   </style>
+  <link rel="stylesheet" href="theme.css?v=2.14">
 </head>
 <body>
-  <div id="updateNotification">
-    新しいバージョンがあります！ <button id="updateButton">今すぐ更新</button>
-  </div>
-
   <div class="container">
-    <h2>メニュー</h2>
+    <header>
+      <h1>メニュー</h1>
+      <div class="subtitle">Drink &amp; Champagne Menu</div>
+    </header>
 
-    <div class="menu-item">
-      <a href="index.html">会計・時間管理画面</a>
+    <div id="updateNotification">
+      新バージョンがあります <button id="updateButton">今すぐ更新</button>
     </div>
 
-    <div class="menu-item">
-      <a href="simulation.html">金額シミュレーション画面</a>
+    <div class="card">
+      <div class="card-title">画面移動</div>
+      <div class="menu-item">
+        <a href="index.html">会計・時間管理</a>
+      </div>
+      <div class="menu-item">
+        <a href="simulation.html">金額シミュレーション</a>
+      </div>
     </div>
-  </div>
 
-  <div class="menu-content">
+  <div class="menu-content card">
     <div class="menu-category">
       <h3>ドリンク</h3>
       <ul class="menu-list">
@@ -219,6 +211,13 @@
       </ul>
     </div>
   </div>
+</div>
+
+  <div class="fixed-bottom-bar">
+    <button class="btn btn-ghost" onclick="window.location.href='index.html'">会計</button>
+    <button class="btn btn-ghost" onclick="window.location.href='simulation.html'">シミュ</button>
+    <button class="btn nav-current" disabled>メニュー</button>
+  </div>
 
   <script>
     // Service Workerの更新通知と処理 (index.htmlと共通)
@@ -241,7 +240,7 @@
     // Service Workerの登録部分にイベントリスナーを追加 (index.htmlと共通)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js?v=2.13', { updateViaCache: 'none' })
+        navigator.serviceWorker.register('./service-worker.js?v=2.14', { updateViaCache: 'none' })
           .then(reg => {
             console.log('ServiceWorker registration successful with scope: ', reg.scope);
             reg.update();
