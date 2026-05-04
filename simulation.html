@@ -12,25 +12,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --bg: #111318;
-      --surface: #1c1f27;
-      --surface-hi: #262b36;
-      --primary: #82aacc;
-      --primary-on: #002845;
-      --primary-cont: #0d3d63;
-      --primary-txt: #c8dfff;
-      --primary-dim: rgba(130,170,204,0.12);
-      --error: #f28b82;
-      --success: #81c995;
-      --text-1: #e2e5f0;
-      --text-2: #9aa3b5;
-      --divider: rgba(255,255,255,0.08);
-      --outline: rgba(255,255,255,0.13);
-      --radius: 8px;
-      --font: 'Noto Sans JP', sans-serif;
-    }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -327,6 +308,7 @@
       font-weight: 700;
     }
   </style>
+  <link rel="stylesheet" href="theme.css?v=2.14">
 </head>
 <body>
 <div class="container">
@@ -465,6 +447,7 @@
 <div class="fixed-bottom-bar">
   <button class="btn btn-danger" id="resetSimulationButton">リセット</button>
   <button class="btn btn-ghost" onclick="window.location.href='index.html'">会計画面</button>
+  <button class="btn nav-current" disabled>シミュ</button>
   <button class="btn btn-ghost" onclick="window.location.href='menu.html'">メニュー</button>
 </div>
 
@@ -732,7 +715,7 @@
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js?v=2.13', { updateViaCache: 'none' })
+        navigator.serviceWorker.register('./service-worker.js?v=2.14', { updateViaCache: 'none' })
           .then(reg => {
             reg.update();
             reg.addEventListener('updatefound', () => {
