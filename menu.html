@@ -9,83 +9,96 @@
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      --bg: #111318;
+      --surface: #1c1f27;
+      --surface-hi: #262b36;
+      --primary: #82aacc;
+      --primary-on: #002845;
+      --text-1: #e2e5f0;
+      --text-2: #9aa3b5;
+      --divider: rgba(255,255,255,0.08);
+      --radius: 8px;
+      --font: 'Noto Sans JP', 'Helvetica Neue', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      font-family: 'Helvetica Neue', sans-serif;
+      font-family: var(--font);
       margin: 0;
-      padding: 15px;
-      background-color: #f9f9f9;
-      color: #333;
+      padding: 0 12px 24px;
+      background: var(--bg);
+      color: var(--text-1);
       display: flex;
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
-      box-sizing: border-box;
-      padding-bottom: 20px; /* 下部に少しスペース */
     }
 
     h2 {
       text-align: center;
-      margin-top: 20px;
-      margin-bottom: 30px;
-      color: #0056b3;
+      margin: 0 0 24px;
+      color: var(--primary);
+      font-size: 1.25rem;
+      letter-spacing: 0.06em;
     }
 
-    .container {
-      max-width: 500px;
-      width: 100%;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 30px;
-      text-align: center;
-      margin-bottom: 20px; /* 下部コンテンツとの間隔 */
-    }
-
-    .menu-item {
-      margin-bottom: 20px;
-    }
-
-    .menu-item a {
-      display: block;
-      background-color: #007bff;
-      color: white;
-      text-decoration: none;
-      padding: 15px 20px;
-      border-radius: 8px;
-      font-size: 1.2rem;
-      transition: background-color 0.2s ease;
-    }
-
-    .menu-item a:hover {
-      background-color: #0056b3;
-    }
-
-    /* メニューコンテンツのスタイル */
+    .container,
     .menu-content {
       max-width: 500px;
       width: 100%;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 20px;
-      margin-top: 20px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.35);
     }
 
-    .menu-category {
-      margin-bottom: 25px;
+    .container {
+      padding: 24px 16px 18px;
+      text-align: center;
+      margin: 18px 0 12px;
     }
+
+    .menu-item { margin-bottom: 12px; }
+    .menu-item:last-child { margin-bottom: 0; }
+
+    .menu-item a {
+      display: block;
+      background: var(--primary);
+      color: var(--primary-on);
+      text-decoration: none;
+      padding: 13px 16px;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 700;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .menu-item a:hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    .menu-content {
+      padding: 16px;
+      margin-top: 0;
+    }
+
+    .menu-category { margin-bottom: 22px; }
+    .menu-category:last-child { margin-bottom: 0; }
 
     .menu-category h3 {
-      background-color: #e2e2e2;
-      color: #555;
-      padding: 10px;
-      border-radius: 6px;
-      margin-top: 0;
-      margin-bottom: 15px;
-      font-size: 1.1rem;
-      text-align: center;
+      background: var(--surface-hi);
+      color: var(--text-1);
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      margin: 0 0 10px;
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      text-align: left;
     }
 
     .menu-list {
@@ -97,61 +110,57 @@
     .menu-list li {
       display: flex;
       justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px dashed #eee;
-      font-size: 1rem;
+      gap: 12px;
+      padding: 10px 4px;
+      border-bottom: 1px solid var(--divider);
+      font-size: 0.92rem;
     }
 
-    .menu-list li:last-child {
-      border-bottom: none;
-    }
+    .menu-list li:last-child { border-bottom: none; }
 
     .menu-item-name {
-      font-weight: bold;
-      color: #333;
-      flex-grow: 1; /* 名前が長い場合にも対応 */
+      font-weight: 700;
+      color: var(--text-1);
+      flex-grow: 1;
       text-align: left;
     }
 
     .menu-item-price {
-      font-weight: bold;
-      color: #d32f2f; /* 価格は赤系で強調 */
+      font-weight: 700;
+      color: var(--primary);
       text-align: right;
-      white-space: nowrap; /* 価格の折り返し防止 */
-      margin-left: 10px; /* 名前との間隔 */
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
 
-    /* PWA更新通知バー (index.htmlと共通スタイル) */
     #updateNotification {
       display: none;
       text-align: center;
-      padding: 10px;
-      background-color: #ffeb3b;
-      color: #333;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      font-weight: bold;
+      padding: 10px 14px;
+      background: rgba(130,170,204,0.1);
+      border: 1px solid rgba(130,170,204,0.35);
+      color: var(--primary);
+      margin-top: 16px;
+      margin-bottom: 12px;
+      border-radius: var(--radius);
+      font-size: 0.82rem;
       width: 100%;
       max-width: 500px;
-      box-sizing: border-box;
     }
 
     #updateNotification button {
-      background-color: #007bff;
-      color: white;
+      background: var(--primary);
+      color: var(--primary-on);
       border: none;
-      padding: 8px 15px;
-      border-radius: 5px;
-      margin-left: 10px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin-left: 8px;
       cursor: pointer;
+      font-weight: 700;
     }
 
-    /* レスポンシブ対応 */
     @media (min-width: 600px) {
-      .container, .menu-content, #updateNotification {
-        padding: 40px;
-      }
+      .container, .menu-content { padding: 24px; }
     }
   </style>
 </head>
@@ -232,7 +241,7 @@
     // Service Workerの登録部分にイベントリスナーを追加 (index.htmlと共通)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js?v=2.12', { updateViaCache: 'none' })
+        navigator.serviceWorker.register('./service-worker.js?v=2.13', { updateViaCache: 'none' })
           .then(reg => {
             console.log('ServiceWorker registration successful with scope: ', reg.scope);
             reg.update();

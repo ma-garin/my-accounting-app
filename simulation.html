@@ -9,83 +9,73 @@
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --gold: #c9a84c;
-      --gold-light: #e8c96a;
-      --gold-dim: rgba(201,168,76,0.15);
-      --dark: #0d0d0f;
-      --dark-card: #16161a;
-      --dark-border: rgba(201,168,76,0.25);
-      --text-main: #f0ead6;
-      --text-muted: #8a8070;
-      --accent-red: #c0392b;
-      --accent-green: #27ae60;
-      --font-display: 'Cormorant Garamond', serif;
-      --font-body: 'Noto Sans JP', sans-serif;
+      --bg: #111318;
+      --surface: #1c1f27;
+      --surface-hi: #262b36;
+      --primary: #82aacc;
+      --primary-on: #002845;
+      --primary-cont: #0d3d63;
+      --primary-txt: #c8dfff;
+      --primary-dim: rgba(130,170,204,0.12);
+      --error: #f28b82;
+      --success: #81c995;
+      --text-1: #e2e5f0;
+      --text-2: #9aa3b5;
+      --divider: rgba(255,255,255,0.08);
+      --outline: rgba(255,255,255,0.13);
+      --radius: 8px;
+      --font: 'Noto Sans JP', sans-serif;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: var(--font-body);
-      background-color: var(--dark);
-      color: var(--text-main);
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-1);
       min-height: 100vh;
-      padding: 12px 12px 80px;
-      position: relative;
-      overflow-x: hidden;
+      padding: 0 12px 80px;
     }
 
-    body::before {
-      content: '';
-      position: fixed;
-      top: -50%; left: -50%;
-      width: 200%; height: 200%;
-      background: radial-gradient(ellipse at 70% 30%, rgba(201,168,76,0.05) 0%, transparent 50%),
-                  radial-gradient(ellipse at 30% 70%, rgba(201,168,76,0.03) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .container { max-width: 500px; margin: auto; position: relative; z-index: 1; }
+    .container { max-width: 500px; margin: auto; }
 
     header {
       text-align: center;
-      padding: 20px 0 16px;
-      border-bottom: 1px solid var(--dark-border);
+      padding: 18px 4px 14px;
+      border-bottom: 1px solid var(--divider);
       margin-bottom: 16px;
     }
     header h1 {
-      font-family: var(--font-display);
-      font-size: 1.8rem;
-      font-weight: 600;
-      color: var(--gold);
-      letter-spacing: 0.12em;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: 0.06em;
     }
     header .subtitle {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
+      font-size: 0.72rem;
+      color: var(--text-2);
+      letter-spacing: 0.12em;
       margin-top: 4px;
     }
 
     /* カード */
     .card {
-      background: var(--dark-card);
-      border: 1px solid var(--dark-border);
-      border-radius: 10px;
+      background: var(--surface);
+      border-radius: var(--radius);
       padding: 16px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.35);
     }
     .card-title {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      color: var(--gold);
-      letter-spacing: 0.1em;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-2);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       margin-bottom: 14px;
       display: flex;
       align-items: center;
@@ -95,46 +85,45 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: var(--dark-border);
+      background: var(--divider);
     }
 
     /* 合計金額表示 */
     #sim-total-card {
-      background: linear-gradient(135deg, #1a1508 0%, #0d0d0f 100%);
-      border-color: var(--gold);
+      background: var(--primary-cont);
       text-align: center;
-      padding: 20px;
+      padding: 22px 16px 18px;
     }
     #sim-total-label {
       font-size: 0.7rem;
-      letter-spacing: 0.3em;
-      color: var(--text-muted);
+      letter-spacing: 0.18em;
+      color: var(--primary-txt);
+      opacity: 0.8;
       text-transform: uppercase;
       margin-bottom: 8px;
     }
     #simulation_grand_total {
-      font-family: var(--font-display);
       font-size: 3rem;
       font-weight: 700;
-      color: var(--gold-light);
+      color: var(--primary-txt);
       line-height: 1;
-      text-shadow: 0 0 30px rgba(201,168,76,0.4);
+      font-variant-numeric: tabular-nums;
     }
     #simulation_grand_total span { font-size: 1.2rem; margin-left: 4px; opacity: 0.8; }
 
     /* 滞在時間コントロール */
     .time-display {
-      font-family: var(--font-display);
       font-size: 3.5rem;
       font-weight: 700;
-      color: var(--text-main);
+      color: var(--text-1);
       text-align: center;
       letter-spacing: 0.05em;
       margin-bottom: 14px;
+      font-variant-numeric: tabular-nums;
     }
     .time-sub {
       font-size: 0.72rem;
-      color: var(--text-muted);
+      color: var(--text-2);
       text-align: center;
       margin-top: -10px;
       margin-bottom: 14px;
@@ -147,21 +136,21 @@
     }
     .btn {
       padding: 11px 8px;
-      border: 1px solid var(--dark-border);
-      border-radius: 8px;
-      font-family: var(--font-body);
+      border: 1px solid var(--outline);
+      border-radius: var(--radius);
+      font-family: var(--font);
       font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
       letter-spacing: 0.02em;
     }
-    .btn-primary { background: var(--gold); color: var(--dark); border-color: var(--gold); }
-    .btn-primary:hover { background: var(--gold-light); }
-    .btn-ghost { background: transparent; color: var(--text-main); }
-    .btn-ghost:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
-    .btn-danger { background: transparent; color: var(--accent-red); border-color: rgba(192,57,43,0.4); }
-    .btn-danger:hover { background: rgba(192,57,43,0.1); }
+    .btn-primary { background: var(--primary); color: var(--primary-on); border-color: var(--primary); }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-ghost { background: transparent; color: var(--text-1); }
+    .btn-ghost:hover { background: var(--primary-dim); border-color: rgba(130,170,204,0.35); }
+    .btn-danger { background: transparent; color: var(--error); border-color: rgba(242,139,130,0.4); }
+    .btn-danger:hover { background: rgba(242,139,130,0.12); }
 
     /* セット数表示バッジ */
     .set-info {
@@ -171,19 +160,18 @@
       gap: 12px;
       margin-top: 12px;
       padding-top: 12px;
-      border-top: 1px solid rgba(255,255,255,0.06);
+      border-top: 1px solid var(--divider);
     }
-    .set-info-label { font-size: 0.75rem; color: var(--text-muted); }
+    .set-info-label { font-size: 0.75rem; color: var(--text-2); }
     .set-badge {
       display: inline-block;
-      background: var(--gold-dim);
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      border-radius: 20px;
-      padding: 2px 16px;
+      background: var(--primary-dim);
+      border: 1px solid rgba(130,170,204,0.4);
+      color: var(--primary);
+      border-radius: var(--radius);
+      padding: 3px 16px;
       font-size: 1rem;
       font-weight: 700;
-      font-family: var(--font-display);
     }
 
     /* ドリンクテーブル */
@@ -191,19 +179,19 @@
     .drink-table thead th {
       font-size: 0.7rem;
       font-weight: 700;
-      color: var(--text-muted);
+      color: var(--text-2);
       text-transform: uppercase;
       letter-spacing: 0.1em;
       padding: 4px 6px 10px;
       text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
+      border-bottom: 1px solid var(--divider);
     }
     .drink-table thead th:first-child { text-align: left; }
     .drink-table tbody tr {
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid var(--divider);
       transition: background 0.15s;
     }
-    .drink-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .drink-table tbody tr:hover { background: rgba(255,255,255,0.04); }
     .drink-table tbody tr:last-child { border-bottom: none; }
     .drink-table td {
       padding: 10px 6px;
@@ -212,9 +200,9 @@
       vertical-align: middle;
     }
     .drink-table td:first-child { text-align: left; font-weight: 700; }
-    .drink-table .price-col { color: var(--text-muted); font-size: 0.8rem; }
-    .drink-table .total-col { color: var(--gold); font-weight: 700; font-size: 0.87rem; }
-    .drink-table .total-col.zero { color: var(--text-muted); }
+    .drink-table .price-col { color: var(--text-2); font-size: 0.8rem; }
+    .drink-table .total-col { color: var(--primary); font-weight: 700; font-size: 0.87rem; }
+    .drink-table .total-col.zero { color: var(--text-2); }
 
     /* 数量コントロール */
     .qty-control {
@@ -227,9 +215,9 @@
       width: 26px;
       height: 26px;
       border-radius: 50%;
-      border: 1px solid var(--dark-border);
+      border: 1px solid var(--outline);
       background: transparent;
-      color: var(--gold);
+      color: var(--primary);
       font-size: 1rem;
       font-weight: 700;
       cursor: pointer;
@@ -239,27 +227,27 @@
       transition: all 0.15s;
       flex-shrink: 0;
     }
-    .qty-btn:hover { background: var(--gold-dim); border-color: var(--gold); }
+    .qty-btn:hover { background: var(--primary-dim); border-color: var(--primary); }
     .qty-val {
-      font-family: var(--font-display);
       font-size: 1.1rem;
       font-weight: 700;
       min-width: 22px;
       text-align: center;
+      font-variant-numeric: tabular-nums;
     }
 
     /* カスタムドリンク入力 */
     .custom-input {
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 5px;
+      background: var(--surface-hi);
+      border: 1px solid var(--outline);
+      border-radius: 6px;
       padding: 5px 8px;
-      color: var(--text-main);
-      font-family: var(--font-body);
+      color: var(--text-1);
+      font-family: var(--font);
       font-size: 0.82rem;
       outline: none;
     }
-    .custom-input:focus { border-color: var(--gold); }
+    .custom-input:focus { border-color: var(--primary); }
     .custom-input.name-input { width: 100%; display: block; margin-bottom: 4px; }
     .custom-input.price-input { width: 70px; text-align: right; }
 
@@ -268,34 +256,34 @@
       padding: 10px;
       margin-top: 12px;
       background: transparent;
-      border: 1px dashed rgba(201,168,76,0.4);
-      border-radius: 7px;
-      color: var(--gold);
+      border: 1px dashed rgba(130,170,204,0.35);
+      border-radius: var(--radius);
+      color: var(--primary);
       font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
       letter-spacing: 0.05em;
       transition: all 0.2s;
     }
-    .add-custom-btn:hover { background: var(--gold-dim); border-style: solid; }
+    .add-custom-btn:hover { background: var(--primary-dim); border-style: solid; }
 
     /* シャンパンシミュ */
     .champ-sim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .champ-sim-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 10px; text-align: center; transition: border-color 0.2s; }
-    .champ-sim-item:hover { border-color: var(--dark-border); background: rgba(255,255,255,0.05); }
+    .champ-sim-item { background: var(--surface-hi); border-radius: var(--radius); padding: 10px; text-align: center; transition: background 0.2s; }
+    .champ-sim-item:hover { background: rgba(255,255,255,0.08); }
     .champ-sim-name { font-size: 0.78rem; font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .champ-sim-price { font-size: 0.68rem; color: var(--text-muted); margin-bottom: 6px; }
-    .champ-sim-total { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--gold); line-height: 1; }
-    .champ-sim-diff { font-size: 0.7rem; color: var(--accent-red); margin-top: 3px; }
+    .champ-sim-price { font-size: 0.68rem; color: var(--text-2); margin-bottom: 6px; }
+    .champ-sim-total { font-size: 1.1rem; font-weight: 700; color: var(--primary); line-height: 1; }
+    .champ-sim-diff { font-size: 0.7rem; color: var(--error); margin-top: 3px; }
     @media (max-width: 380px) { .champ-sim-grid { grid-template-columns: 1fr; } }
 
     /* サマリーテーブル */
-    .summary-table tr { border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .summary-table tr { border-bottom: 1px solid var(--divider); }
     .summary-table tr:last-child { border-bottom: none; }
     .summary-table td { padding: 8px 4px; font-size: 0.87rem; }
-    .summary-table td:first-child { color: var(--text-muted); }
+    .summary-table td:first-child { color: var(--text-2); }
     .summary-table td:last-child { text-align: right; font-weight: 700; }
-    .summary-table .total-row td { padding-top: 12px; font-size: 1rem; color: var(--gold); }
+    .summary-table .total-row td { padding-top: 12px; font-size: 1rem; color: var(--primary); }
 
     /* 下部固定バー */
     .fixed-bottom-bar {
@@ -305,9 +293,9 @@
       transform: translateX(-50%);
       width: 100%;
       max-width: 500px;
-      background: rgba(13,13,15,0.95);
+      background: rgba(28,31,39,0.97);
       backdrop-filter: blur(12px);
-      border-top: 1px solid var(--dark-border);
+      border-top: 1px solid var(--divider);
       padding: 10px 12px;
       display: flex;
       gap: 8px;
@@ -318,18 +306,18 @@
     /* PWA更新通知 */
     #updateNotification {
       display: none;
-      background: rgba(201,168,76,0.15);
-      border: 1px solid var(--gold);
-      border-radius: 8px;
+      background: rgba(130,170,204,0.1);
+      border: 1px solid rgba(130,170,204,0.35);
+      border-radius: var(--radius);
       padding: 10px 14px;
       text-align: center;
       font-size: 0.82rem;
-      color: var(--gold);
+      color: var(--primary);
       margin-bottom: 14px;
     }
     #updateButton {
-      background: var(--gold);
-      color: var(--dark);
+      background: var(--primary);
+      color: var(--primary-on);
       border: none;
       padding: 5px 12px;
       border-radius: 5px;
@@ -744,7 +732,7 @@
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js?v=2.12', { updateViaCache: 'none' })
+        navigator.serviceWorker.register('./service-worker.js?v=2.13', { updateViaCache: 'none' })
           .then(reg => {
             reg.update();
             reg.addEventListener('updatefound', () => {
